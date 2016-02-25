@@ -23,13 +23,13 @@
 #include <QtCore/QRegularExpressionMatch>
 #include <QtCore/QDebug>
 
-StringHandle::StringHandle()
+StringHandle::StringHandle(QObject *parent) : QObject(parent)
 {
 
 }
 
 StringHandle::CodeType StringHandle::checkCode(QString s){
-    qDebug() << s;
+    //qDebug() << s;
     if (s == "PWETRT10")
         return PWETRT10;
     else if (s == "PWETRT20")
@@ -43,7 +43,7 @@ StringHandle::CodeType StringHandle::checkCode(QString s){
     else return NOT_DEFINED_CODE;
 }
 
-void StringHandle::Teste(QString string){
+QRegularExpressionMatch StringHandle::Teste(QString str){
     //PWETRT10 - PWEUJI10 - PWETRT20 - PWETRT30 - PWETRT40
     QRegularExpression const code("(?<code>\\w{6}\\d{2})\\s");
 
@@ -120,35 +120,43 @@ void StringHandle::Teste(QString string){
                                  "(?<executionTime>\\d{2}:\\d{2}:\\d{2})"
                                  );
 
-    QRegularExpressionMatch match = code.match(string);
-
+    QRegularExpressionMatch match = code.match(str);
     if (match.hasMatch()) {
         CodeType code = checkCode(match.captured(1));
+        //qDebug() << code;
 
         switch (code){
         case PWETRT10:
-            match = entry.match(string);
-            db.write(match, code);
+            match = entry.match(str);
+            return match;
             break;
         case PWEUJI10:
-            match = start.match(string);
-            //db.write(match);
+            match = start.match(str);
+            return match;
             break;
         case PWETRT20:
-            match = processing.match(string);
-            //db.write(match);
+            match = processing.match(str);
+            return match;
             break;
         case PWETRT40:
-            match = checking.match(string);
-            //db.write(match);
+            match = checking.match(str);
+            return match;
             break;
         case PWETRT30:
-            match = end.match(string);
-            //db.write(match);
+            match = end.match(str);
+            return match;
             break;
         default:
             qDebug() << match.captured(1) + " code not defined, yet!";
             break;
         }
     }
+    else qDebug() << "String does not have match";
+}
+
+void StringHandle::checkString(QString str)
+{
+    QRegularExpressionMatch match;
+    match = Teste(str);
+    emit dataValidated(match);
 }

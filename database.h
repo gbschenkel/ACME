@@ -39,16 +39,14 @@ public:
         PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10
     };
 
-    void write(QRegularExpressionMatch match, StringHandle::CodeType code);
-
 private:
-    QJsonObject jsonObject;
-    QJsonArray jsonArray;
-    QJsonDocument jsonDocument;
+    void write(QRegularExpressionMatch match);
+    void insertToDB(QRegularExpressionMatch match);
 
 signals:
 
 public slots:
+    void inputData(QRegularExpressionMatch match);
 };
 
 #endif // DATABASE_H

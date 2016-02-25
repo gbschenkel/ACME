@@ -29,11 +29,11 @@ Database::Database(QObject *parent) : QObject(parent)
 
 }
 
-void Database::write(QRegularExpressionMatch match, StringHandle::CodeType code)
+void Database::write(QRegularExpressionMatch match)
 {
-    if (code == PWETRT10)
-        insert;
-
+    //if (code == PWETRT10)
+      //  insert;
+/*
     json["osNumber"] = match.captured("osNumber");
     json["jobName"] = match.captured("jobName");
     json["jobNumber"] = match.captured("jobNumber");
@@ -43,33 +43,51 @@ void Database::write(QRegularExpressionMatch match, StringHandle::CodeType code)
     json["conditionCode"] = match.captured("conditionCode");
     json["executionDate"] = match.captured("executionDate");
     json["executionTime"] = match.captured("executionTime");
+    */
 }
 
-void Database::insert(){
-    /*
-    QRegularExpression const entry("(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
-                                   "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
-                                   "(?<machine>\\w{4})\\."
-                                   "(?<code>\\w{6}\\d{2})\\s+"
-                                   "(?<jobName>\\w+)\\s+"
-                                   "ZN(?<osNumber>\\d{6})\\s+"
-                                   "(?<jobNumber>\\d{5})\\s"
-                                   "(?<entryDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                                   "(?<entryTime>\\d{2}:\\d{2}:\\d{2})"
-                                   );
+void Database::insertToDB(QRegularExpressionMatch match){
+    /* Job entry's RegExp
+    "(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
+    "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
+    "(?<machine>\\w{4})\\."
+    "(?<code>\\w{6}\\d{2})\\s+"
+    "(?<jobName>\\w+)\\s+"
+    "ZN(?<osNumber>\\d{6})\\s+"
+    "(?<jobNumber>\\d{5})\\s"
+    "(?<entryDate>\\d{2}/\\d{2}/\\d{2})\\s"
+    "(?<entryTime>\\d{2}:\\d{2}:\\d{2})"
     */
-    jsonObject["osNumber"] = match.captured("osNumber");
-    jsonObject["entryDate"] = match.captured("entryDate");
-    jsonObject["entryTime"] = match.captured("entryTime");
+    QJsonObject serviceOrder;
+    serviceOrder["osNumber"] = match.captured("osNumber");
+    serviceOrder["entryDate"] = match.captured("entryDate");
+    serviceOrder["entryTime"] = match.captured("entryTime");
 
-    QJsonArray array;
-    array.append();
+    QJsonObject job;
+    job["jobName"] = match.captured("jobName");
+    job["jobNumber"] = match.captured("jobNumber");
+    job["machine"] = match.captured("machine");
 
-    jsonObject["jobName"] = match.captured("jobName");
-    jsonObject["jobNumber"] = match.captured("jobNumber");
-    jsonObject["machine"] = match.captured("machine");
+    QJsonArray jobs;
+    jobs.append(job);
+
+    serviceOrder["jobs"] = jobs;
+
+    QJsonDocument jDoc;
+    jDoc.setObject(serviceOrder);
+    QJsonObject guga = jDoc.object();
+    guga["jobs"].toArray().append(djfs);
 
 
+    qDebug() << jDoc;
 
+}
+
+void Database::inputData(QRegularExpressionMatch match)
+{
+    if (match.captured("code") == "PWETRT10") {
+        qDebug() << "match okay";
+        insertToDB(match);
+    }
 
 }

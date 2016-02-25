@@ -26,17 +26,19 @@
 LogReader::LogReader(QObject *parent) : QObject(parent)
 {
     configuration = new Config();
-    directory.setPath("Y:/Data");
+
+    connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
+    connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
+    connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &db, SLOT(inputData(QRegularExpressionMatch)));
+
+    directory.setPath("Z:/Log");
     fileList << "/Pvqvscmw.log" << "/Pvqvscmw1.log"
              << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
              << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
              << "/Pvqvscmw6.log";
-
     // Força a leitura no arquivo na inicialização.
     readFile(0);
-
     watcher.addPath(directory.absolutePath()+fileList.at(0));
-    connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
 }
 
 void LogReader::fileChanged(QString str)
@@ -91,7 +93,7 @@ void LogReader::readFile(int i)
         /*
          * Aqui processará os dados contidos no objeto lastLine
         */
-        checkRegularExpression(lastLine);
+        emit dataReceived(lastLine);
     }
     /*
      * O valor do index é igual a posição atual no arquivo, diminuido do tamanho do registro anterior,
@@ -105,11 +107,4 @@ void LogReader::readFile(int i)
     configuration->doWrite();
 
     file.close();
-}
-
-void LogReader::checkRegularExpression(QString string)
-{
-    //qDebug() << string;
-    StringHandle s;
-    s.Teste(string);
 }

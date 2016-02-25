@@ -41,14 +41,15 @@ private:
     Config *configuration;
     QStringList fileList;
     QDir directory;
-    QTextStream input;
     QFileSystemWatcher watcher;
+
     Database db;
+    StringHandle sHandle;
 
     void readFile(int i);
-    void checkRegularExpression(QString string);
 
 signals:
+    void dataReceived(QString str);
 
 public slots:
     void fileChanged(QString str);

@@ -21,18 +21,29 @@
 #define STRINGHANDLE_H
 
 #include <QtCore/QObject>
+#include <QtCore/QRegularExpressionMatch>
 
-class StringHandle
+class StringHandle : public QObject
 {
+    Q_OBJECT
 public:
+    explicit StringHandle(QObject *parent = 0);
+
     enum CodeType{
         PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10, NOT_DEFINED_CODE
     };
 
-    StringHandle();
-    void Teste(QString string);
-
     CodeType checkCode(QString);
+
+private:
+    QRegularExpressionMatch Teste(QString str);
+
+signals:
+    void dataValidated(QRegularExpressionMatch match);
+
+public slots:
+    void checkString(QString str);
+
 };
 
 #endif // STRINGHANDLE_H
