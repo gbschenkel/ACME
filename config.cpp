@@ -19,40 +19,52 @@
 **
 ****************************************************************************/
 
-#ifndef LOGREADER_H
-#define LOGREADER_H
-
 #include "config.h"
-#include "database.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QDir>
-#include <QtCore/QFileSystemWatcher>
-#include <QtCore/QTextStream>
-#include <QtCore/qglobal.h>
-
-class LogReader : public QObject
+Config::Config(QObject *parent) : QObject(parent)
 {
-    Q_OBJECT
-public:
-    explicit LogReader(QObject *parent = 0);
+    QCoreApplication::setOrganizationName("Banrisul S.A.");
+    QCoreApplication::setOrganizationDomain("banrisul.com.br");
+    QCoreApplication::setApplicationName("Druid");
 
-private:
-    Config *configuration;
-    QStringList fileList;
-    QDir directory;
-    QFileSystemWatcher watcher;
+    settings = new QSettings();
 
-    Database db;
-    StringHandle sHandle;
+    readSettings();
+}
 
-    void readFile(int i);
+qint64 Config::getIndex()
+{
+    return index;
+}
 
-signals:
-    void dataReceived(QString str);
+QString Config::getLastLine()
+{
+    return lastLine;
+}
 
-public slots:
-    void fileChanged(QString str);
-};
+void Config::setIndex(qint64 newIndex)
+{
+    index = newIndex;
+}
 
-#endif // LOGREADER_H
+void Config::setLastLine(QString line)
+{
+    lastLine = line;
+}
+
+void Config::doWrite()
+{
+    writeSettings();
+}
+
+void Config::writeSettings()
+{
+    settings->setValue("File/index", index);
+    settings->setValue("File/lastLine", lastLine);
+}
+
+void Config::readSettings()
+{
+    index = settings->value("file/index").toInt();
+    lastLine = settings->value("File/lastLine").toString();
+}

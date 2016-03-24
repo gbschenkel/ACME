@@ -2,7 +2,7 @@
 **
 ** Druid - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2015  Gustavo Brondani Schenkel
+** Copyright (C) 2016  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,27 +23,12 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonArray>
 #include <QtCore/QDebug>
+#include <QtCore/QProcess>
 
 Database::Database(QObject *parent) : QObject(parent)
 {
-
-}
-
-void Database::write(QRegularExpressionMatch match)
-{
-    //if (code == PWETRT10)
-      //  insert;
-/*
-    json["osNumber"] = match.captured("osNumber");
-    json["jobName"] = match.captured("jobName");
-    json["jobNumber"] = match.captured("jobNumber");
-    json["machine"] = match.captured("machine");
-    json["stepName"] = match.captured("stepName");
-    json["program"] = match.captured("program");
-    json["conditionCode"] = match.captured("conditionCode");
-    json["executionDate"] = match.captured("executionDate");
-    json["executionTime"] = match.captured("executionTime");
-    */
+    qDebug() << "teste";
+    startServer();
 }
 
 void Database::insertToDB(QRegularExpressionMatch match){
@@ -58,6 +43,7 @@ void Database::insertToDB(QRegularExpressionMatch match){
     "(?<entryDate>\\d{2}/\\d{2}/\\d{2})\\s"
     "(?<entryTime>\\d{2}:\\d{2}:\\d{2})"
     */
+
     QJsonObject serviceOrder;
     serviceOrder["osNumber"] = match.captured("osNumber");
     serviceOrder["entryDate"] = match.captured("entryDate");
@@ -75,11 +61,20 @@ void Database::insertToDB(QRegularExpressionMatch match){
 
     QJsonDocument jDoc;
     jDoc.setObject(serviceOrder);
+
+    /*qDebug() << jDoc;
+
+    QJsonObject bla;
+    bla["jobName"] = "PKOS382";
+    bla["jobNumber"] = "48597";
+    bla["machine"] = "SYSB";
     QJsonObject guga = jDoc.object();
-    guga["jobs"].toArray().append(djfs);
+    QJsonArray jobs1 = guga["jobs"].toArray();
+    jobs1.append(bla);
+    guga["jobs"] = jobs1;
+    jDoc.setObject(guga);
 
-
-    qDebug() << jDoc;
+    qDebug() << guga;*/
 
 }
 
@@ -90,4 +85,24 @@ void Database::inputData(QRegularExpressionMatch match)
         insertToDB(match);
     }
 
+}
+
+void Database::client()
+{
+    QString program = "C:/mongodb/bin/mongod.exe";
+    QStringList arguments;
+    arguments << "--journal";
+
+    QProcess *server = new QProcess();
+    server->start(program, arguments);
+}
+
+void Database::startServer()
+{
+    QString program = "C:/mongodb/bin/mongod.exe";
+    QStringList arguments;
+    arguments << "--journal";
+
+    QProcess *server = new QProcess();
+    server->start(program, arguments);
 }

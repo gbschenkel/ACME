@@ -2,7 +2,7 @@
 **
 ** Druid - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2015  Gustavo Brondani Schenkel
+** Copyright (C) 2016  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public:
     };
 
 private:
-    void write(QRegularExpressionMatch match);
+    void startServer();
     void insertToDB(QRegularExpressionMatch match);
 
 signals:

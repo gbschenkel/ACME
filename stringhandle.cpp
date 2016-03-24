@@ -43,7 +43,7 @@ StringHandle::CodeType StringHandle::checkCode(QString s){
     else return NOT_DEFINED_CODE;
 }
 
-QRegularExpressionMatch StringHandle::Teste(QString str){
+void StringHandle::validade(QString str){
     //PWETRT10 - PWEUJI10 - PWETRT20 - PWETRT30 - PWETRT40
     QRegularExpression const code("(?<code>\\w{6}\\d{2})\\s");
 
@@ -128,23 +128,23 @@ QRegularExpressionMatch StringHandle::Teste(QString str){
         switch (code){
         case PWETRT10:
             match = entry.match(str);
-            return match;
+            emit dataValidated(match);
             break;
         case PWEUJI10:
             match = start.match(str);
-            return match;
+            emit dataValidated(match);
             break;
         case PWETRT20:
             match = processing.match(str);
-            return match;
+            emit dataValidated(match);
             break;
         case PWETRT40:
             match = checking.match(str);
-            return match;
+            emit dataValidated(match);
             break;
         case PWETRT30:
             match = end.match(str);
-            return match;
+            emit dataValidated(match);
             break;
         default:
             qDebug() << match.captured(1) + " code not defined, yet!";
@@ -157,6 +157,5 @@ QRegularExpressionMatch StringHandle::Teste(QString str){
 void StringHandle::checkString(QString str)
 {
     QRegularExpressionMatch match;
-    match = Teste(str);
-    emit dataValidated(match);
+    validade(str);
 }

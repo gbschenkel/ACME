@@ -2,7 +2,7 @@
 **
 ** Druid - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2015  Gustavo Brondani Schenkel
+** Copyright (C) 2016  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -25,22 +25,31 @@
 
 LogReader::LogReader(QObject *parent) : QObject(parent)
 {
+
     configuration = new Config();
 
     connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
     connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
     connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &db, SLOT(inputData(QRegularExpressionMatch)));
-
+    /*
     directory.setPath("Z:/Log");
     fileList << "/Pvqvscmw.log" << "/Pvqvscmw1.log"
              << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
              << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
              << "/Pvqvscmw6.log";
+    */
+    directory.setPath("C:/Users/B40141/Projetos/Druid/docs");
+    fileList << "/Pvqvscmw.log";
+
     // Força a leitura no arquivo na inicialização.
     readFile(0);
     watcher.addPath(directory.absolutePath()+fileList.at(0));
 }
 
+/*!
+ * \brief LogReader::fileChanged
+ * \param str
+ */
 void LogReader::fileChanged(QString str)
 {
     if (watcher.files().empty())
@@ -49,6 +58,10 @@ void LogReader::fileChanged(QString str)
     readFile(fileList.indexOf(str));
 }
 
+/*!
+ * \brief LogReader::readFile
+ * \param i
+ */
 void LogReader::readFile(int i)
 {
     qint64 index = configuration->getIndex();
@@ -73,7 +86,7 @@ void LogReader::readFile(int i)
      * para que o arquivo seja lido desde o inicio.
     */
     if (lastLine != configuration->getLastLine()) {
-        if (i < 6) {
+        if (i < fileList.size()-1) {
             readFile(i+1);
         }
         index = 0;

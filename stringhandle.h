@@ -17,6 +17,7 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
+
 #ifndef STRINGHANDLE_H
 #define STRINGHANDLE_H
 
@@ -36,7 +37,7 @@ public:
     CodeType checkCode(QString);
 
 private:
-    QRegularExpressionMatch Teste(QString str);
+    void validade(QString str);
 
 signals:
     void dataValidated(QRegularExpressionMatch match);
