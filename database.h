@@ -23,10 +23,12 @@
 #define DATABASE_H
 
 #include "stringhandle.h"
+#include "definition.h"
 
 #include <QtCore/QJsonObject>
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
+#include <qtcore/QByteArray>
 
 
 class Database : public QObject
@@ -35,18 +37,17 @@ class Database : public QObject
 public:
     explicit Database(QObject *parent = 0);
 
-    enum CodeType {
-        PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10
-    };
-
 private:
+    void client();
+    void client(QByteArray dbInsert);
     void startServer();
-    void insertToDB(QRegularExpressionMatch match);
+    void checkCollection();
 
 signals:
 
 public slots:
-    void inputData(QRegularExpressionMatch match);
+    void insertData(QByteArray dbInsert);
+    void updateData(QByteArray dbUpdate);
 };
 
 #endif // DATABASE_H

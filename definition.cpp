@@ -17,30 +17,19 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-
-#ifndef STRINGHANDLE_H
-#define STRINGHANDLE_H
-
 #include "definition.h"
 
-#include <QtCore/QObject>
-#include <QtCore/QRegularExpressionMatch>
-
-class StringHandle : public QObject
-{
-    Q_OBJECT
-public:
-    explicit StringHandle(QObject *parent = 0);
-
-private:
-    void validate(QString str);
-
-signals:
-    void dataValidated(QRegularExpressionMatch match);
-
-public slots:
-    void checkString(QString str);
-
-};
-
-#endif // STRINGHANDLE_H
+CodeType checkCode(QString s){
+    //qDebug() << s;
+    if (s == "PWETRT10")
+        return PWETRT10;
+    else if (s == "PWETRT20")
+        return PWETRT20;
+    else if (s == "PWETRT30")
+        return PWETRT30;
+    else if (s == "PWETRT40")
+        return PWETRT40;
+    else if (s == "PWEUJI10")
+        return PWEUJI10;
+    else return NOT_DEFINED_CODE;
+}

@@ -17,30 +17,31 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-
-#ifndef STRINGHANDLE_H
-#define STRINGHANDLE_H
+#ifndef JSON_H
+#define JSON_H
 
 #include "definition.h"
 
-#include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
+#include <QtCore/QObject>
 
-class StringHandle : public QObject
+class JSON : public QObject
 {
     Q_OBJECT
 public:
-    explicit StringHandle(QObject *parent = 0);
+    explicit JSON(QObject *parent = 0);
 
 private:
-    void validate(QString str);
+    void newDocument(QRegularExpressionMatch match);
+    void updateDocument(QRegularExpressionMatch match);
+    void documentToJSON(QJsonDocument jsonDocument);
 
 signals:
-    void dataValidated(QRegularExpressionMatch match);
+    void documentCreated(QByteArray);
 
 public slots:
-    void checkString(QString str);
+    void inputData(QRegularExpressionMatch match);
 
 };
 
-#endif // STRINGHANDLE_H
+#endif // JSON_H

@@ -30,13 +30,15 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
 
     connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
     connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
-    connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &db, SLOT(inputData(QRegularExpressionMatch)));
+    connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &json, SLOT(inputData(QRegularExpressionMatch)));
+    connect(&json, SIGNAL(documentCreated(QByteArray)), &db, SLOT(insertData(QByteArray)));
     /*
     directory.setPath("Z:/Log");
-    fileList << "/Pvqvscmw.log" << "/Pvqvscmw1.log"
+    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
              << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
              << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
-             << "/Pvqvscmw6.log";
+             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
+             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
     */
     directory.setPath("C:/Users/B40141/Projetos/Druid/docs");
     fileList << "/Pvqvscmw.log";
@@ -46,10 +48,6 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
     watcher.addPath(directory.absolutePath()+fileList.at(0));
 }
 
-/*!
- * \brief LogReader::fileChanged
- * \param str
- */
 void LogReader::fileChanged(QString str)
 {
     if (watcher.files().empty())
@@ -58,10 +56,6 @@ void LogReader::fileChanged(QString str)
     readFile(fileList.indexOf(str));
 }
 
-/*!
- * \brief LogReader::readFile
- * \param i
- */
 void LogReader::readFile(int i)
 {
     qint64 index = configuration->getIndex();

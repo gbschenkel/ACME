@@ -11,13 +11,17 @@ SOURCES += main.cpp \
     logreader.cpp \
     config.cpp \
     database.cpp \
-    stringhandle.cpp
+    stringhandle.cpp \
+    json.cpp \
+    definition.cpp
 
 HEADERS += \
     logreader.h \
     config.h \
     database.h \
-    stringhandle.h
+    stringhandle.h \
+    json.h \
+    definition.h
 
 DISTFILES +=
 
