@@ -37,6 +37,7 @@ private:
 
 signals:
     void dataValidated(QRegularExpressionMatch match);
+    void codeChanged(CodeType *code);
 
 public slots:
     void checkString(QString str);

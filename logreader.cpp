@@ -30,19 +30,27 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
 
     connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
     connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
+    connect(&sHandle, SIGNAL(codeChanged(CodeType*)), &json, SLOT(inputCode(CodeType*)));
+    connect(&sHandle, SIGNAL(codeChanged(CodeType*)), &db, SLOT(inputCode(CodeType*)));
     connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &json, SLOT(inputData(QRegularExpressionMatch)));
-    connect(&json, SIGNAL(documentCreated(QByteArray)), &db, SLOT(insertData(QByteArray)));
-    /*
+    connect(&json, SIGNAL(documentCreated(QByteArray)), &db, SLOT(receiveData(QByteArray)));
+    connect(this, SIGNAL(readToWrite()), &db, SLOT(openMongoConn()));
+    connect(this, SIGNAL(writenDone()), &db, SLOT(closeMongoConn()));
+
     directory.setPath("Z:/Log");
     fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
              << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
              << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
              << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
              << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
+    /*
+    directory.setPath("C:/Temp/Data");
+    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
+             << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
+             << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
+             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
+             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
     */
-    directory.setPath("C:/Users/B40141/Projetos/Druid/docs");
-    fileList << "/Pvqvscmw.log";
-
     // Força a leitura no arquivo na inicialização.
     readFile(0);
     watcher.addPath(directory.absolutePath()+fileList.at(0));
@@ -62,9 +70,11 @@ void LogReader::readFile(int i)
     QString lastLine;
 
     QFile file(directory.absolutePath()+fileList.at(i));
+    //if (!file.exists())
+    //    return;
     if (!file.open(QIODevice::ReadOnly))
         return;
-    qDebug() << "Arquivo " + directory.absolutePath()+fileList.at(i) + " aberto!";
+    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " opened!";
 
     QTextStream in(&file);
     in.seek(index);
@@ -87,6 +97,8 @@ void LogReader::readFile(int i)
         in.seek(index);
     }
 
+    emit(readToWrite());
+
     /*
      * Posiciona entrada de dados na última posição lida no arquivo;
      * Como essa linha já foi lida e processada na última vez, ele lê ela
@@ -102,6 +114,8 @@ void LogReader::readFile(int i)
         */
         emit dataReceived(lastLine);
     }
+
+    emit(writenDone());
     /*
      * O valor do index é igual a posição atual no arquivo, diminuido do tamanho do registro anterior,
      * e decrementado 2(duas) unidades, que é o valor do '\n'.
@@ -114,4 +128,5 @@ void LogReader::readFile(int i)
     configuration->doWrite();
 
     file.close();
+    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " closed!";
 }

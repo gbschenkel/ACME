@@ -25,11 +25,12 @@
 #include "stringhandle.h"
 #include "definition.h"
 
+#include <QtCore/QByteArray>
 #include <QtCore/QJsonObject>
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
-#include <qtcore/QByteArray>
-
+#include <QtCore/QThread>
+#include <QtCore/QProcess>
 
 class Database : public QObject
 {
@@ -38,16 +39,26 @@ public:
     explicit Database(QObject *parent = 0);
 
 private:
-    void client();
-    void client(QByteArray dbInsert);
-    void startServer();
-    void checkCollection();
+    CodeType *code;
+    QProcess mongoClient;
+    const QString program = "C:/mongodb/bin/mongo.exe";
+    const QStringList arguments = (QStringList() << "--verbose" << "--host" << "localhost" << "--port" << "27017");
 
+    void client(QByteArray database);
+    void startServer();
+    void updateCode(CodeType *code);
+    void insertNewDoc(QByteArray database);
+    void updateJobStep(QByteArray database);
+    void updateJobStarted(QByteArray database);
 signals:
+    void operate(QByteArray data);
 
 public slots:
-    void insertData(QByteArray dbInsert);
-    void updateData(QByteArray dbUpdate);
+    void inputCode(CodeType *code);
+    void receiveData(QByteArray data);
+    void openMongoConn();
+    void closeMongoConn();
+
 };
 
 #endif // DATABASE_H

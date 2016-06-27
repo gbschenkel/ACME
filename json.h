@@ -32,15 +32,18 @@ public:
     explicit JSON(QObject *parent = 0);
 
 private:
+    CodeType *code;
     void newDocument(QRegularExpressionMatch match);
-    void updateDocument(QRegularExpressionMatch match);
+    void jobStep(QRegularExpressionMatch match);
     void documentToJSON(QJsonDocument jsonDocument);
+    void updateCode(CodeType *code);
 
 signals:
     void documentCreated(QByteArray);
 
 public slots:
     void inputData(QRegularExpressionMatch match);
+    void inputCode(CodeType *code);
 
 };
 

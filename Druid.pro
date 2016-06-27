@@ -12,8 +12,7 @@ SOURCES += main.cpp \
     config.cpp \
     database.cpp \
     stringhandle.cpp \
-    json.cpp \
-    definition.cpp
+    json.cpp
 
 HEADERS += \
     logreader.h \

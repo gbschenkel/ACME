@@ -25,7 +25,6 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
-
 #include <QtCore/QDebug>
 
 JSON::JSON(QObject *parent) : QObject(parent)
@@ -53,12 +52,12 @@ void JSON::newDocument(QRegularExpressionMatch match)
     documentToJSON(jsonDocument);
 }
 
-void JSON::updateDocument(QRegularExpressionMatch match)
+void JSON::jobStep(QRegularExpressionMatch match)
 {
     QJsonObject step;
     step["stepName"] = match.captured("stepName");
     step["program"] = match.captured("program");
-    step["ended"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
+    step["finished"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
     step["conditionCode"] = match.captured("conditionCode").toInt();
 
     QJsonObject job;
@@ -79,24 +78,26 @@ void JSON::documentToJSON(QJsonDocument jsonDocument){
     emit(documentCreated(jsonDocument.toJson(QJsonDocument::Compact)));
 }
 
+void JSON::updateCode(CodeType *code)
+{
+    this->code = code;
+    //qDebug() << "JSON::code >" << *this->code;
+}
+
 void JSON::inputData(QRegularExpressionMatch match)
 {
-
-    CodeType codeType = checkCode(match.captured("code"));
-    //qDebug() << codeType;
-
-    switch (codeType){
+    switch (*code){
     case PWETRT10:
         //qDebug() << "Job Entry";
         newDocument(match);
         break;
     case PWEUJI10:
         //qDebug() << "Job Started";
-       //updateDocument(match);
+        //JobStarted(match);
         break;
     case PWETRT20:
         //qDebug() << "Processing Job - Step Ended";
-        //updateDocument(match);
+        jobStep(match);
         break;
     case PWETRT40:
         //qDebug() << "Job runned without errors";
@@ -110,5 +111,7 @@ void JSON::inputData(QRegularExpressionMatch match)
     }
 }
 
-    //dbInsert = jsonDocument.toJson(QJsonDocument::Compact);
-    //serviceOrder["entry"] = "new Date(\""+QDate::fromString(match.captured("entryDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("entryTime"), "hh:mm:ss").toString()+"\")";
+void JSON::inputCode(CodeType *code)
+{
+    updateCode(code);
+}

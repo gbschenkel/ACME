@@ -33,8 +33,9 @@ void StringHandle::validate(QString str){
 
     QRegularExpressionMatch match = stringCode.match(str);
     if (match.hasMatch()) {
-
-        switch (checkCode(match.captured("code"))){
+        CodeType code = checkCode(match.captured("code"));
+        emit codeChanged(&code);
+        switch (code){
         case PWETRT10:
             match = entry.match(str);
             if (match.hasMatch())

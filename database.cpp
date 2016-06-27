@@ -26,6 +26,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
+#include <QtCore/QTimer>
 
 Database::Database(QObject *parent) : QObject(parent)
 {
@@ -42,95 +43,185 @@ void Database::startServer()
 
     qDebug() << arguments;
     QProcess *server = new QProcess();
-    server->start(program, arguments);
+    server->start(program, arguments, QIODevice::WriteOnly);
 }
 
-void Database::client()
+
+void Database::client(QByteArray database)
 {
-    QString program = "C:/mongodb/bin/mongo.exe";
-    QStringList arguments;
-    arguments << "--verbose" << "--host" << "localhost" << "--port" << "27017";
 
-    QProcess *client = new QProcess();
-    client->start(program, arguments);
+    //qDebug() << database;
 
-    client->write("use druidDB\n");
-    client->waitForBytesWritten();
-    client->write("db.serviceOrders.insert({x:1})\n");
-    client->waitForBytesWritten();
-    client->write("exit\n");
-    client->waitForBytesWritten();
-    if (client->waitForFinished()) {
-        client->kill();
+    mongoClient.write("use druidDB\n");
+    mongoClient.write(database);
+    //mongoClient.write("exit\n");
+    mongoClient.waitForBytesWritten();
+    //mongoClient.closeWriteChannel();
+    /*
+    mongoClient.closeReadChannel(QProcess::StandardOutput);
+    mongoClient.closeReadChannel(QProcess::StandardOutput);
+
+    if (mongoClient.waitForFinished()) {
+        mongoClient.deleteLater();
     }
+    */
 }
 
-void Database::client(QByteArray dbInsert)
+void Database::insertNewDoc(QByteArray database)
 {
-    QString program = "C:/mongodb/bin/mongo.exe";
-    QStringList arguments;
-    arguments << "--verbose" << "--host" << "localhost" << "--port" << "27017";
-
-    QProcess *client = new QProcess();
-    client->start(program, arguments);
-
-    //dbInsert = "db.serviceOrders.insert("+jsonDocument.toJson(QJsonDocument::Compact).remove(9,1).remove(18,1).remove(38,1).remove(40,1)+")\n";
-
-    qDebug() << dbInsert;
-    client->write("use druidDB\n");
-    client->waitForBytesWritten();
-    client->write(dbInsert);
-    client->waitForBytesWritten();
-    client->write("exit\n");
-    client->waitForBytesWritten();
-    if (client->waitForFinished()) {
-        client->close();
-        client->kill();
-    }
-}
-
-void Database::insertData(QByteArray dbInsert)
-{
-    dbInsert.prepend("db.serviceOrders.insert(");
-    dbInsert.append(")\n");
+    database.prepend("db.serviceOrders.insert(");
+    database.append(")\n");
 
     QByteArray y("\"entry\":");
     int x;
-    if (dbInsert.contains(y)){
-            x = dbInsert.indexOf(y);
-            dbInsert.insert(x+y.size(),"new Date(");
+    if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x+y.size(),"new Date(");
             y = "\"jobs\":";
-            if (dbInsert.contains(y)){
-                    x = dbInsert.indexOf(y);
-                    dbInsert.insert(x-1,")");
+            if (database.contains(y)){
+                    x = database.indexOf(y);
+                    database.insert(x-1,")");
             }
     }
     y = "\"jobNumber\":";
-    if (dbInsert.contains(y)){
-            x = dbInsert.indexOf(y);
-            dbInsert.insert(x+y.size(),"NumberInt(");
+    if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x+y.size(),"NumberInt(");
             y = "\"machine\":";
-            if (dbInsert.contains(y)){
-                    x = dbInsert.indexOf(y);
-                    dbInsert.insert(x-1,")");
+            if (database.contains(y)){
+                    x = database.indexOf(y);
+                    database.insert(x-1,")");
             }
     }
-    y = "\"osNumber\":";
-    if (dbInsert.contains(y)){
-            x = dbInsert.indexOf(y);
-            dbInsert.insert(x+y.size(),"NumberInt(");
-            dbInsert.insert(dbInsert.size()-3,")");
+    y = "\"soNumber\":";
+    if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x+y.size(),"NumberInt(");
+            database.insert(database.size()-3,")");
     }
-    client(dbInsert);
+    client(database);
 }
 
-void Database::updateData(QByteArray dbUpdate)
-{
-    dbUpdate.prepend("db.serviceOrders.update(");
-    dbUpdate.append(")\n");
+void Database::updateJobStarted(QByteArray database){
+
 }
 
-void Database::checkCollection()
+void Database::updateJobStep(QByteArray database)
+{
+    //qDebug() << "Updating data\n" << dbUpdate;
+
+    database.prepend("db.getCollection('serviceOrders').update(");
+    database.append(")\n");
+
+    int x;
+    QByteArray y("\"jobName\":");
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x, "\"jobs\": {$elemMatch: {");
+        y = "\"soNumber\":";
+        if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x-1,"}}");
+        }
+    }
+    y = "\"steps\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x-1,"}");
+    }
+    y = "\"steps\":[";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.remove(x,y.size());
+        database.insert(x,"{$addToSet:{\"jobs.$.steps\":");
+    }
+    y = "\"conditionCode\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"NumberInt(");
+        y = "\"finished\":";
+        if (database.contains(y)){
+                x = database.indexOf(y);
+                database.insert(x-1,")");
+        }
+    }
+    y = "\"finished\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"new Date(");
+        y = "\"program\":";
+        if (database.contains(y)){
+                x = database.indexOf(y);
+                database.insert(x-1,")");
+        }
+    }
+    y = "]";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.replace(x,y.size(),"}");
+    }
+
+    //qDebug().noquote() << dbUpdate;
+    client(database);
+}
+
+void Database::inputCode(CodeType *code)
+{
+    updateCode(code);
+}
+
+void Database::receiveData(QByteArray data)
 {
 
+    switch(*code){
+    case PWETRT10:
+        //qDebug() << "Job Entry";
+        //qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        insertNewDoc(data);
+        break;
+    case PWEUJI10:
+        qDebug() << "Job Started";
+        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        updateJobStarted(data);
+        break;
+    case PWETRT20:
+        //qDebug() << "Processing Job - Step Ended";
+        //qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        updateJobStep(data);
+        break;
+    case PWETRT40:
+        qDebug() << "Job runned without errors";
+        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        break;
+    case PWETRT30:
+        qDebug() << "Job ended";
+        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        break;
+    default:
+        qDebug() << "Code Not Defined!";
+        break;
+    }
+}
+
+void Database::openMongoConn()
+{
+    mongoClient.start(program, arguments, QProcess::WriteOnly);
+    mongoClient.closeReadChannel(QProcess::StandardOutput);
+    mongoClient.closeReadChannel(QProcess::StandardError);
+}
+
+void Database::closeMongoConn()
+{
+    mongoClient.write("exit\n");
+    mongoClient.waitForBytesWritten();
+    mongoClient.closeWriteChannel();
+    if (mongoClient.waitForFinished()) {
+        mongoClient.close();
+    }
+}
+
+void Database::updateCode(CodeType *code)
+{
+    this->code = code;
+    //qDebug() << "Database::code >" << *this->code;
 }

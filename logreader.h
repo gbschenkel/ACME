@@ -53,6 +53,8 @@ private:
 
 signals:
     void dataReceived(QString str);
+    void readToWrite();
+    void writenDone();
 
 public slots:
     void fileChanged(QString str);

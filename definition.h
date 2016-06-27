@@ -27,7 +27,20 @@ enum CodeType{
     PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10, NOT_DEFINED_CODE
 };
 
-CodeType checkCode(QString s);
+inline CodeType checkCode(QString s){
+    //qDebug() << s;
+    if (s == "PWETRT10")
+        return PWETRT10;
+    else if (s == "PWETRT20")
+        return PWETRT20;
+    else if (s == "PWETRT30")
+        return PWETRT30;
+    else if (s == "PWETRT40")
+        return PWETRT40;
+    else if (s == "PWEUJI10")
+        return PWEUJI10;
+    else return NOT_DEFINED_CODE;
+}
 
 //PWETRT10 - PWETRT20 - PWETRT30 - PWETRT40 - PWEUJI10
 QRegularExpression const stringCode("(?<code>\\w{6}\\d{2})\\s");
