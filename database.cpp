@@ -50,7 +50,7 @@ void Database::startServer()
 void Database::client(QByteArray database)
 {
 
-    //qDebug() << database;
+//    qDebug() << database;
 
     mongoClient.write("use druidDB\n");
     mongoClient.write(database);
@@ -75,43 +75,138 @@ void Database::insertNewDoc(QByteArray database)
     QByteArray y("\"entry\":");
     int x;
     if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"new Date(");
+        y = "\"jobs\":";
+        if (database.contains(y)){
             x = database.indexOf(y);
-            database.insert(x+y.size(),"new Date(");
-            y = "\"jobs\":";
-            if (database.contains(y)){
-                    x = database.indexOf(y);
-                    database.insert(x-1,")");
-            }
+            database.insert(x-1,")");
+        }
     }
     y = "\"jobNumber\":";
     if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"NumberInt(");
+        y = "\"jobStatus\":";
+        if (database.contains(y)){
             x = database.indexOf(y);
-            database.insert(x+y.size(),"NumberInt(");
-            y = "\"machine\":";
-            if (database.contains(y)){
-                    x = database.indexOf(y);
-                    database.insert(x-1,")");
-            }
+            database.insert(x-1,")");
+        }
     }
     y = "\"soNumber\":";
     if (database.contains(y)){
-            x = database.indexOf(y);
-            database.insert(x+y.size(),"NumberInt(");
-            database.insert(database.size()-3,")");
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"NumberInt(");
+        database.insert(database.size()-3,")");
+//        y = "\"soStatus\":";
+//        if (database.contains(y)){
+//            x = database.indexOf(y);
+//            database.insert(x-1,")");
+//        }
     }
+//    qDebug().noquote() << database;
     client(database);
 }
 
-void Database::updateJobStarted(QByteArray database){
+void Database::updateJobStarted(QByteArray database)
+{
+    database.prepend("db.getCollection('serviceOrders').update(");
 
+    int x;
+    QByteArray y("\"jobName\":");
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x, "\"jobs\": {$elemMatch: {");
+        y = "\"soNumber\":";
+        if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x-1,"}}");
+        }
+    }
+    y = "\"started\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x-1,"}");
+    }
+    y = "\"started\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.remove(x,y.size());
+        database.insert(x,"{$set:{\"jobs.$.jobStatus\":\"running\",\"jobs.$.started\":");
+    }
+    y = "{\"jobs.$.started\":";
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x+y.size(),"new Date(");
+        y = "}})";
+        if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x,")");
+        }
+    }
+
+    database.append("})\n");
+
+    //    qDebug().noquote() << database;
+    client(database);
+}
+
+void Database::updateJobCheck(QByteArray database)
+{
+    database.prepend("db.getCollection('serviceOrders').update(");
+
+    int x;
+    QByteArray y("\"jobName\":");
+    if (database.contains(y)){
+        x = database.indexOf(y);
+        database.insert(x, "\"jobs\": {$elemMatch: {");
+        y = "\"soNumber\":";
+        if (database.contains(y)){
+            x = database.indexOf(y);
+            database.insert(x-1,"}}");
+        }
+    }
+    database.append(",{$set:{\"open\":false}})\n");
+
+//    qDebug().noquote() << database;
+    client(database);
+
+}
+
+void Database::updateJobEnded(QByteArray database)
+{
+//    database.prepend("db.getCollection('serviceOrders').update(");
+
+//    int x;
+//    QByteArray y("\"jobName\":");
+//    if (database.contains(y)){
+//        x = database.indexOf(y);
+//        database.insert(x, "\"jobs\": {$elemMatch: {");
+//        y = "\"soNumber\":";
+//        if (database.contains(y)){
+//            x = database.indexOf(y);
+//            database.insert(x-1,"}}");
+//        }
+//    }
+
+//    database.append("})\n");
+
+    QJsonDocument doc = QJsonDocument::fromJson(database);
+    QJsonObject obj(doc.object());
+
+    QString string;
+    QByteArray command;
+    command.append("db.getCollection('serviceOrders').update({");
+    command.append("\"soNumber\":");
+    command.append(QString::number(obj["jobNumber"].toDouble()));
+
+    qDebug().noquote() << command;
+    //qDebug().noquote() << QString::number(obj["jobNumber"].toDouble());
 }
 
 void Database::updateJobStep(QByteArray database)
 {
-    //qDebug() << "Updating data\n" << dbUpdate;
-
     database.prepend("db.getCollection('serviceOrders').update(");
-    database.append(")\n");
 
     int x;
     QByteArray y("\"jobName\":");
@@ -135,24 +230,24 @@ void Database::updateJobStep(QByteArray database)
         database.remove(x,y.size());
         database.insert(x,"{$addToSet:{\"jobs.$.steps\":");
     }
-    y = "\"conditionCode\":";
-    if (database.contains(y)){
-        x = database.indexOf(y);
-        database.insert(x+y.size(),"NumberInt(");
-        y = "\"finished\":";
-        if (database.contains(y)){
-                x = database.indexOf(y);
-                database.insert(x-1,")");
-        }
-    }
+//    y = "\"conditionCode\":";
+//    if (database.contains(y)){
+//        x = database.indexOf(y);
+//        database.insert(x+y.size(),"NumberInt(");
+//        y = "\"cpuTime\":";
+//        if (database.contains(y)){
+//                x = database.indexOf(y);
+//                database.insert(x-1,")");
+//        }
+//    }
     y = "\"finished\":";
     if (database.contains(y)){
         x = database.indexOf(y);
         database.insert(x+y.size(),"new Date(");
         y = "\"program\":";
         if (database.contains(y)){
-                x = database.indexOf(y);
-                database.insert(x-1,")");
+            x = database.indexOf(y);
+            database.insert(x-1,")");
         }
     }
     y = "]";
@@ -160,8 +255,9 @@ void Database::updateJobStep(QByteArray database)
         x = database.indexOf(y);
         database.replace(x,y.size(),"}");
     }
+    database.append(")\n");
 
-    //qDebug().noquote() << dbUpdate;
+//    qDebug().noquote() << database;
     client(database);
 }
 
@@ -175,30 +271,32 @@ void Database::receiveData(QByteArray data)
 
     switch(*code){
     case PWETRT10:
-        //qDebug() << "Job Entry";
-        //qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-        insertNewDoc(data);
+//        qDebug() << "Database: Job Entry";
+//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+//        insertNewDoc(data);
         break;
     case PWEUJI10:
-        qDebug() << "Job Started";
-        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-        updateJobStarted(data);
+//        qDebug() << "Database: Job Started";
+//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+//        updateJobStarted(data);
         break;
     case PWETRT20:
-        //qDebug() << "Processing Job - Step Ended";
-        //qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-        updateJobStep(data);
+//        qDebug() << "Database: Processing Job - Step Ended";
+//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+//        updateJobStep(data);
         break;
     case PWETRT40:
-        qDebug() << "Job runned without errors";
-        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+//        qDebug() << "Database: Job runned without errors";
+//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+//        updateJobCheck(data);
         break;
     case PWETRT30:
-        qDebug() << "Job ended";
+        qDebug() << "Database: Job ended";
         qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
+        updateJobEnded(data);
         break;
     default:
-        qDebug() << "Code Not Defined!";
+//        qDebug() << "Database: Code Not Defined!";
         break;
     }
 }
@@ -225,3 +323,4 @@ void Database::updateCode(CodeType *code)
     this->code = code;
     //qDebug() << "Database::code >" << *this->code;
 }
+

@@ -65,6 +65,6 @@ void Config::writeSettings()
 
 void Config::readSettings()
 {
-    index = settings->value("file/index").toInt();
+    index = settings->value("File/index").toInt();
     lastLine = settings->value("File/lastLine").toString();
 }

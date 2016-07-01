@@ -37,20 +37,14 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
     connect(this, SIGNAL(readToWrite()), &db, SLOT(openMongoConn()));
     connect(this, SIGNAL(writenDone()), &db, SLOT(closeMongoConn()));
 
+    //directory.setPath("C:/Temp/Data");
     directory.setPath("Z:/Log");
     fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
              << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
              << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
              << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
              << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
-    /*
-    directory.setPath("C:/Temp/Data");
-    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
-             << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
-             << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
-             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
-             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
-    */
+
     // Força a leitura no arquivo na inicialização.
     readFile(0);
     watcher.addPath(directory.absolutePath()+fileList.at(0));

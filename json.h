@@ -34,7 +34,10 @@ public:
 private:
     CodeType *code;
     void newDocument(QRegularExpressionMatch match);
+    void jobStarted(QRegularExpressionMatch match);
     void jobStep(QRegularExpressionMatch match);
+    void jobCheck(QRegularExpressionMatch match);
+    void jobEnded(QRegularExpressionMatch match);
     void documentToJSON(QJsonDocument jsonDocument);
     void updateCode(CodeType *code);
 

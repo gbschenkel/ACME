@@ -50,6 +50,8 @@ private:
     void insertNewDoc(QByteArray database);
     void updateJobStep(QByteArray database);
     void updateJobStarted(QByteArray database);
+    void updateJobCheck(QByteArray database);
+    void updateJobEnded(QByteArray database);
 signals:
     void operate(QByteArray data);
 

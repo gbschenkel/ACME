@@ -28,6 +28,5 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     LogReader logreader;
     return a.exec();
-    //return 0;
 }
 

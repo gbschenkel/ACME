@@ -42,27 +42,27 @@ void StringHandle::validate(QString str){
                 emit dataValidated(match);
             break;
         case PWEUJI10:
-            match = start.match(str);
+            match = started.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT20:
-            match = processing.match(str);
+            match = stepProcessed.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT40:
-            match = checking.match(str);
+            match = checkIfOkay.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT30:
-            match = end.match(str);
+            match = ended.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         default:
-            qDebug() << match.captured(1) + " code not defined, yet!";
+//            qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
             break;
         }
     }
