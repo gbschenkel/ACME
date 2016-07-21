@@ -21,7 +21,7 @@
 #define DEFINITION_H
 
 #include <QtCore/QObject>
-#include <qtcore/QRegularExpression>
+#include <Qtcore/QRegularExpression>
 
 enum CodeType{
     PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10, NOT_DEFINED_CODE
