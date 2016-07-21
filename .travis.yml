@@ -5,11 +5,11 @@ compiler:
 - clang
 - gcc
 env:
-- CONFIG=Release
-- CONFIG=Debug
 - QT_BASE=55
 - QT_BASE=56
 - QT_BASE=57
+- CONFIG=Debug
+- CONFIG=Release
 before_install:
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - |
