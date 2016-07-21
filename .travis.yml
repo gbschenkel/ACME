@@ -1,54 +1,39 @@
-
 language: cpp
-
-os:
-  - linux
-  - osx
-
+sudo: required
+dist: trusty
+compiler:
+- clang
+- gcc
 env:
-  - CONFIG=Release
-  - CONFIG=Debug
+- CONFIG=Release
+- CONFIG=Debug
+- QT_BASE=55
+- QT_BASE=56
+- QT_BASE=57
+before_install:
+- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+- |
+  if [ "$CXX" = "clang" ]; then
+    sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6-binaries main' >> /etc/apt/sources.list"
+    sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise main' >> /etc/apt/sources.list"
+    wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  fi
+- if [ "$QT_BASE" = "53" ]; then sudo add-apt-repository ppa:beineri/opt-qt55 -y; fi
+- if [ "$QT_BASE" = "54" ]; then sudo add-apt-repository ppa:beineri/opt-qt56 -y; fi
+- if [ "$QT_BASE" = "55" ]; then sudo add-apt-repository ppa:beineri/opt-qt57 -y; fi
+- sudo apt-get update -qq
 
 install:
-  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-         wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-i386.tar.gz
-      && tar -xzf cmake-3.2.3-Linux-i386.tar.gz
-      && sudo cp -fR cmake-3.2.3-Linux-i386/* /usr
-      && sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
-      && sudo apt-add-repository -y ppa:beineri/opt-qt541
-      && sudo apt-get -qq update
-      && sudo apt-get -qq install g++-4.9 libc6-i386 qt54tools qt54svg qt54webkit
-      && export CXX="g++-4.9"
-      && export CC="gcc-4.9"
-      ;
-    else
-         brew update
-      && brew unlink cmake
-      && brew install cmake
-      && brew install qt5
-      && chmod -R 755 /usr/local/opt/qt5/*
-      ;
-    fi
+- sudo apt-get install -qq g++-4.9 gcc-4.9
+- if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+- |
+  if [ "$CXX" = "clang" ]; then
+    sudo apt-get install -qq llvm-3.6
+    export CXX="clang++" CC="clang"
+  fi
+- $CXX --version
+- sudo apt-get install -qq qt${QT_BASE}base qt${QT_BASE}script; source /opt/qt${QT_BASE}/bin/qt${QT_BASE}-env.sh
 
 script:
-  # Note: Travis CI uses Ubuntu 12.04 LTS while we use Ubuntu 14.04 LTS, and
-  #       this causes problems when we try to use our prebuilt version of
-  #       libgit2 (because of its need of libc). So, to 'fix' this, we ask for
-  #       libgit2 to be built on Linux...
-  -    cd build
-    && if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-         cmake -DCMAKE_BUILD_TYPE=$CONFIG -DCMAKE_PREFIX_PATH=/opt/qt54/lib/cmake -DUSE_PREBUILT_LIBGIT2_PLUGIN=OFF -DENABLE_TESTS=ON -DENABLE_SAMPLES=ON ..
-         ;
-       else
-         cmake -DCMAKE_BUILD_TYPE=$CONFIG -DCMAKE_PREFIX_PATH=/usr/local/opt/qt5/lib/cmake -DENABLE_TESTS=ON -DENABLE_SAMPLES=ON ..
-         ;
-       fi
-    && make -j 3
-    && cd ..
-    && if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
-         build/bin/runtests
-         ;
-       else
-         build/OpenCOR.app/Contents/MacOS/runtests
-         ;
-       fi
+- qmake -r "QMAKE_CXX=$CXX" "QMAKE_CC=$CC"
+- make check
