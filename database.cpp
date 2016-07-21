@@ -304,8 +304,12 @@ void Database::receiveData(QByteArray data)
 void Database::openMongoConn()
 {
     mongoClient.start(program, arguments, QProcess::WriteOnly);
-    mongoClient.closeReadChannel(QProcess::StandardOutput);
-    mongoClient.closeReadChannel(QProcess::StandardError);
+    if (mongoClient.Running){
+        mongoClient.closeReadChannel(QProcess::StandardOutput);
+        mongoClient.closeReadChannel(QProcess::StandardError);
+    } else {
+        qDebug() << ("Mongo client not running");
+    }
 }
 
 void Database::closeMongoConn()

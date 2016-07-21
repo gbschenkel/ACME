@@ -66,8 +66,10 @@ void LogReader::readFile(int i)
     QFile file(directory.absolutePath()+fileList.at(i));
     //if (!file.exists())
     //    return;
-    if (!file.open(QIODevice::ReadOnly))
+    if (!file.exists() && !file.open(QIODevice::ReadOnly)){
+        qDebug() << "File not found or can't be read.";
         return;
+    }
     qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " opened!";
 
     QTextStream in(&file);
