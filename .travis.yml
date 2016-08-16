@@ -2,7 +2,6 @@ language: cpp
 sudo: required
 dist: trusty
 compiler:
-- clang
 - gcc
 env:
 - QT_BASE=56
@@ -24,11 +23,6 @@ before_install:
 install:
 - sudo apt-get install -qq g++-5 gcc-5
 - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
-- |
-  if [ "$CXX" = "clang" ]; then
-    sudo apt-get install -qq llvm-3.8
-    export CXX="clang++" CC="clang"
-  fi
 - $CXX --version
 - sudo apt-get install -qq qt${QT_BASE}base qt${QT_BASE}script; source /opt/qt${QT_BASE}/bin/qt${QT_BASE}-env.sh
 
