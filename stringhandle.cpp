@@ -29,12 +29,17 @@ StringHandle::StringHandle(QObject *parent) : QObject(parent)
 
 }
 
+void StringHandle::checkString(QString str)
+{
+    validate(str);
+}
+
 void StringHandle::validate(QString str){
 
     QRegularExpressionMatch match = stringCode.match(str);
     if (match.hasMatch()) {
-        CodeType code = checkCode(match.captured("code"));
-        emit codeChanged(&code);
+        code = checkCode(match.captured("code"));
+        emit codeChanged(code);
         switch (code){
         case PWETRT10:
             match = entry.match(str);
@@ -67,10 +72,4 @@ void StringHandle::validate(QString str){
         }
     }
     else qDebug() << "String doesn't have match";
-}
-
-void StringHandle::checkString(QString str)
-{
-    QRegularExpressionMatch match;
-    validate(str);
 }

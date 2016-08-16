@@ -29,4 +29,3 @@ int main(int argc, char *argv[])
     LogReader logreader;
     return a.exec();
 }
-

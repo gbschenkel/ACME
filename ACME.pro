@@ -1,7 +1,7 @@
 QT += core sql
 QT -= gui
 
-TARGET = Druid
+TARGET = ACME
 CONFIG += console
 CONFIG -= app_bundle
 

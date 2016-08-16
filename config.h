@@ -22,10 +22,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <QtCore/QObject>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QObject>
 #include <QtCore/QSettings>
-#include <QtCore/qglobal.h>
 
 class Config : public QObject
 {

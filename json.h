@@ -23,6 +23,10 @@
 #include "definition.h"
 
 #include <QtCore/QRegularExpressionMatch>
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonArray>
+#include <QtCore/QByteArray>
 #include <QtCore/QObject>
 
 class JSON : public QObject
@@ -32,21 +36,22 @@ public:
     explicit JSON(QObject *parent = 0);
 
 private:
-    CodeType *code;
+    CodeType code;
     void newDocument(QRegularExpressionMatch match);
     void jobStarted(QRegularExpressionMatch match);
     void jobStep(QRegularExpressionMatch match);
     void jobCheck(QRegularExpressionMatch match);
     void jobEnded(QRegularExpressionMatch match);
     void documentToJSON(QJsonDocument jsonDocument);
-    void updateCode(CodeType *code);
+    void updateCode(CodeType code);
 
 signals:
     void documentCreated(QByteArray);
+    void jsonCreated(QJsonObject);
 
 public slots:
     void inputData(QRegularExpressionMatch match);
-    void inputCode(CodeType *code);
+    void inputCode(CodeType code);
 
 };
 

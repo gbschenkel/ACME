@@ -23,9 +23,9 @@
 
 Config::Config(QObject *parent) : QObject(parent)
 {
-    QCoreApplication::setOrganizationName("Banrisul S.A.");
-    QCoreApplication::setOrganizationDomain("banrisul.com.br");
-    QCoreApplication::setApplicationName("Druid");
+    QCoreApplication::setOrganizationName("TrollTech");
+    QCoreApplication::setOrganizationDomain("trolltech.com.br");
+    QCoreApplication::setApplicationName("ACME");
 
     settings = new QSettings();
 

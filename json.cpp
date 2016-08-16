@@ -43,7 +43,7 @@ void JSON::newDocument(QRegularExpressionMatch match)
     job["jobName"] = match.captured("jobName");
     job["jobNumber"] = match.captured("jobNumber").toInt();
     job["machine"] = match.captured("machine");
-    job["jobStatus"] = "queued";
+    job["jobStatus"] = "queue";
 
     QJsonArray jobs;
     jobs.append(job);
@@ -52,23 +52,38 @@ void JSON::newDocument(QRegularExpressionMatch match)
     QJsonDocument jsonDocument;
     jsonDocument.setObject(serviceOrder);
     documentToJSON(jsonDocument);
+
+    emit jsonCreated(serviceOrder);
 }
 
 void JSON::jobStarted(QRegularExpressionMatch match)
 {
+    QJsonObject serviceOrder;
+    serviceOrder["soNumber"] = match.captured("soNumber").toInt();
+
     QJsonObject job;
-    job["soNumber"] = match.captured("soNumber").toInt();
     job["jobName"] = match.captured("jobName");
     job["jobNumber"] = match.captured("jobNumber").toInt();
     job["started"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
+    job["jobStatus"] = "running";
+
+    QJsonArray jobs;
+    jobs.append(job);
+    serviceOrder["jobs"] = jobs;
 
     QJsonDocument jsonDocument;
     jsonDocument.setObject(job);
     documentToJSON(jsonDocument);
+
+    emit jsonCreated(serviceOrder);
 }
 
 void JSON::jobStep(QRegularExpressionMatch match)
 {
+
+    QJsonObject serviceOrder;
+    serviceOrder["soNumber"] = match.captured("soNumber").toInt();
+
     QJsonObject step;
     step["stepName"] = match.captured("stepName");
     step["program"] = match.captured("program");
@@ -82,54 +97,73 @@ void JSON::jobStep(QRegularExpressionMatch match)
     job["jobName"] = match.captured("jobName");
     job["jobNumber"] = match.captured("jobNumber").toInt();
 
-    //The expression 'soNumber' was to be a ServiceOrder object,
-    //but since the QJsonDocument don't maintain the structure when creating a new document,
-    //the easiest way was put 'soNumber' as a 'job' attribute.
-    job["soNumber"] = match.captured("soNumber").toInt();
-
     QJsonArray steps;
     steps.append(step);
     job["steps"] = steps;
 
+    QJsonArray jobs;
+    jobs.append(job);
+    serviceOrder["jobs"] = jobs;
+
     QJsonDocument jsonDocument;
     jsonDocument.setObject(job);
     documentToJSON(jsonDocument);
+
+    emit jsonCreated(serviceOrder);
 }
 
 void JSON::jobCheck(QRegularExpressionMatch match)
 {
+    QJsonObject serviceOrder;
+    serviceOrder["soNumber"] = match.captured("soNumber").toInt();
+    serviceOrder["open"] = false;
+    serviceOrder["finished"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
+
     QJsonObject job;
-    job["soNumber"] = match.captured("soNumber").toInt();
     job["jobName"] = match.captured("jobName");
     job["jobNumber"] = match.captured("jobNumber").toInt();
+
+    QJsonArray jobs;
+    jobs.append(job);
+    serviceOrder["jobs"] = jobs;
 
     QJsonDocument jsonDocument;
     jsonDocument.setObject(job);
     documentToJSON(jsonDocument);
+
+    emit jsonCreated(serviceOrder);
 }
 
 void JSON::jobEnded(QRegularExpressionMatch match)
 {
+    QJsonObject serviceOrder;
+    serviceOrder["soNumber"] = match.captured("soNumber").toInt();
+
     QJsonObject job;
-    job["soNumber"] = match.captured("soNumber").toInt();
     job["jobName"] = match.captured("jobName");
     job["jobNumber"] = match.captured("jobNumber").toInt();
-    job["finished"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
     job["jobStatus"] = "finished";
+    job["finished"] = QDate::fromString(match.captured("executionDate"), "dd/MM/yy").addYears(100).toString(Qt::ISODate)+"T"+QTime::fromString(match.captured("executionTime"), "hh:mm:ss").toString();
     job["elapsedTime"] = match.captured("elapsedTime").toDouble()*60;
     job["cpuTime"] = match.captured("cpuTime").toDouble();
     job["srbTime"] = match.captured("srbTime").toDouble();
 
+    QJsonArray jobs;
+    jobs.append(job);
+    serviceOrder["jobs"] = jobs;
+
     QJsonDocument jsonDocument;
     jsonDocument.setObject(job);
     documentToJSON(jsonDocument);
+
+    emit jsonCreated(serviceOrder);
 }
 
 void JSON::documentToJSON(QJsonDocument jsonDocument){
     emit(documentCreated(jsonDocument.toJson(QJsonDocument::Compact)));
 }
 
-void JSON::updateCode(CodeType *code)
+void JSON::updateCode(CodeType code)
 {
     this->code = code;
     //qDebug() << "JSON::code >" << *this->code;
@@ -137,7 +171,7 @@ void JSON::updateCode(CodeType *code)
 
 void JSON::inputData(QRegularExpressionMatch match)
 {
-    switch (*code){
+    switch (code){
     case PWETRT10:
 //        qDebug() << "JSON: Job Entry";
         newDocument(match);
@@ -155,7 +189,7 @@ void JSON::inputData(QRegularExpressionMatch match)
         jobCheck(match);
         break;
     case PWETRT30:
-        qDebug() << "JSON: Job ended";
+//        qDebug() << "JSON: Job ended";
         jobEnded(match);
         break;
     default:
@@ -164,7 +198,7 @@ void JSON::inputData(QRegularExpressionMatch match)
     }
 }
 
-void JSON::inputCode(CodeType *code)
+void JSON::inputCode(CodeType code)
 {
     updateCode(code);
 }

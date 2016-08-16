@@ -33,11 +33,12 @@ public:
     explicit StringHandle(QObject *parent = 0);
 
 private:
+    CodeType code;
     void validate(QString str);
 
 signals:
     void dataValidated(QRegularExpressionMatch match);
-    void codeChanged(CodeType *code);
+    void codeChanged(CodeType code);
 
 public slots:
     void checkString(QString str);
