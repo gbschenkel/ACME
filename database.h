@@ -42,26 +42,21 @@ private:
     CodeType code;
     QProcess mongoClient;
     const QString program = "C:/mongodb/bin/mongo.exe";
-    const QStringList arguments = (QStringList() << "--verbose" << "--host" << "localhost" << "--port" << "27017");
+    const QStringList arguments = (QStringList() << "--quiet" << "--verbose" << "--host" << "localhost" << "--port" << "27017");
 
     void client(QByteArray database);
     void startServer();
     void updateCode(CodeType code);
-    void insertOrUpdateJob(QByteArray data);
     void insertOrUpdateJob(QJsonObject jsonData);
-    void updateJobStep(QByteArray data);
     void updateJobStep(QJsonObject jsonData);
-    void updateJobStarted(QByteArray data);
     void updateJobStarted(QJsonObject jsonData);
-    void updateJobCheck(QByteArray data);
     void updateJobCheck(QJsonObject jsonData);
-    void updateJobEnded(QByteArray data);
     void updateJobEnded(QJsonObject jsonData);
+    QByteArray otherClient(QByteArray database);
 signals:
 
 public slots:
     void inputCode(CodeType code);
-    void receiveData(QByteArray data);
     void receiveData(QJsonObject data);
     void openMongoConn();
     void closeMongoConn();

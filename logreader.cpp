@@ -33,20 +33,19 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
     connect(&sHandle, SIGNAL(codeChanged(CodeType)), &json, SLOT(inputCode(CodeType)));
     connect(&sHandle, SIGNAL(codeChanged(CodeType)), &db, SLOT(inputCode(CodeType)));
     connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &json, SLOT(inputData(QRegularExpressionMatch)));
-    connect(&json, SIGNAL(documentCreated(QByteArray)), &db, SLOT(receiveData(QByteArray)));
     connect(&json, SIGNAL(jsonCreated(QJsonObject)), &db, SLOT(receiveData(QJsonObject)));
     connect(this, SIGNAL(readToWrite()), &db, SLOT(openMongoConn()));
     connect(this, SIGNAL(writenDone()), &db, SLOT(closeMongoConn()));
 
-//    directory.setPath("Z:/Log");
-//    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
-//             << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
-//             << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
-//             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
-//             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
+    directory.setPath("Z:/Log");
+    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
+             << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
+             << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
+             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
+             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
 
-    directory.setPath("C:/Temp/Data");
-    fileList << "/Pvqvscmw.log";
+//    directory.setPath("C:/Temp/Data");
+//    fileList << "/Pvqvscmw.log";
 //    fileList << "/Log (1).log" << "/Log (2).log"
 //             << "/Log (3).log" << "/Log (4).log"
 //             << "/Log (5).log" << "/Log (6).log"
@@ -56,7 +55,13 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
 //             << "/Log (13).log" << "/Log (14).log"
 //             << "/Log (15).log" << "/Log (16).log"
 //             << "/Log (17).log" << "/Log (18).log"
-//             << "/Log (19).log" << "/Log (20).log";
+//             << "/Log (19).log" << "/Log (20).log"
+//             << "/Log (21).log" << "/Log (22).log"
+//             << "/Log (23).log" << "/Log (24).log"
+//             << "/Log (25).log" << "/Log (26).log"
+//             << "/Log (27).log" << "/Log (28).log"
+//             << "/Log (29).log" << "/Log (30).log"
+//             << "/Log (31).log" << "/Log (32).log";
 
     // Força a leitura no arquivo na inicialização.
     readFile(0);

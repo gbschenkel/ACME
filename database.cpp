@@ -49,63 +49,32 @@ void Database::startServer()
 
 void Database::client(QByteArray database)
 {
-
-//    qDebug() << database;
-
-    mongoClient.write("use ACME\n");
     mongoClient.write(database);
-    //mongoClient.write("exit\n");
     mongoClient.waitForBytesWritten();
-    //mongoClient.closeWriteChannel();
-    /*
-    mongoClient.closeReadChannel(QProcess::StandardOutput);
-    mongoClient.closeReadChannel(QProcess::StandardOutput);
-
-    if (mongoClient.waitForFinished()) {
-        mongoClient.deleteLater();
-    }
-    */
 }
 
-void Database::insertOrUpdateJob(QByteArray data)
+QByteArray Database::otherClient(QByteArray database)
 {
-    data.prepend("db.serviceOrders.insert(");
-    data.append(")\n");
+    QProcess mongoClient;
+    mongoClient.start(program, arguments, QProcess::ReadWrite);
+    if (mongoClient.waitForStarted()){
+        mongoClient.write("use ACME\n");
+    } else {
+        qDebug() << "Mongo client couldn't connect to server";
+        exit(1);
+    }
 
-    QByteArray y("\"entry\":");
-    int x;
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x+y.size(),"new Date(");
-        y = "\"jobs\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,")");
-        }
+    mongoClient.write(database);
+    mongoClient.waitForBytesWritten();
+    mongoClient.write("exit\n");
+    mongoClient.waitForBytesWritten();
+    QByteArray input;
+    while (mongoClient.waitForReadyRead()){
+        input += mongoClient.readAllStandardOutput();
     }
-    y = "\"jobNumber\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x+y.size(),"NumberInt(");
-        y = "\"jobStatus\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,")");
-        }
-    }
-    y = "\"soNumber\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x+y.size(),"NumberInt(");
-        data.insert(data.size()-3,")");
-//        y = "\"soStatus\":";
-//        if (database.contains(y)){
-//            x = database.indexOf(y);
-//            database.insert(x-1,")");
-//        }
-    }
-//    qDebug().noquote() << data;
-//    client(data);
+    mongoClient.waitForFinished();
+    mongoClient.close();
+    return input;
 }
 
 void Database::insertOrUpdateJob(QJsonObject jsonData)
@@ -120,99 +89,27 @@ void Database::insertOrUpdateJob(QJsonObject jsonData)
     QString machine = "\"machine\": \"" + jsonData["jobs"].toArray().first().toObject().value("machine").toString() + "\"";
     QString open = "\"open\": " + QString(jsonData.value("open").toBool() ? "true": "false");
 
-//    dbData.append("db.getCollection('serviceOrders').update({");
-//    dbData.append("\"soNumber\": NumberInt(");
-//    dbData.append(QString::number(jsonData.value("soNumber").toDouble()));
-//    dbData.append("),");
-//    dbData.append("\"jobs\":{$elemMatch:{jobName:\"");
-//    dbData.append(jsonData["jobs"].toArray().first().toObject().value("jobName").toString());
-//    dbData.append("\",");
-//    dbData.append("jobNumber:");
-//    dbData.append(QString::number(jsonData["jobs"].toArray().first().toObject().value("jobNumber").toDouble()));
-//    dbData.append("}}},{$setOnInsert:{\"entry\": new Date(");
-//    dbData.append(jsonData.value("entry").toString());
-//    dbData.append("),");
-//    dbData.append("\"jobs\":{\"jobName:");
-//    dbData.append(jsonData.value("jobName").toString());
-
-//    dbData.append("db.getCollection('serviceOrders').update({"
-//                  "\"soNumber\": " + soNumber + ","
-//                  "\"jobs\":{$elemMatch:{"
-//                  "\"jobName\": \"" + jobName + "\","
-//                  "\"jobNumber\": " + jobNumber + "}}},{$setOnInsert:{"
-//                  "\"entry\": ISODate(\"" + entry + "\"),"
-//                  "\"soNumber\": NumberInt(" + soNumber + "),"
-//                  "\"open\": " + open + ","
-//                  "\"jobs\": {"
-//                  "\"jobName\": \"" + jobName + "\","
-//                  "\"jobNumber\": NumberInt(" + jobNumber + "),"
-//                  "\"jobStatus\": \"" + jobStatus + "\","
-//                  "\"machine\": \"" + machine + "\"}}},{upsert: true})");
-
     dbData.append("db.getCollection('serviceOrders').update({"
                   + soNumber + ","
-                  "\"jobs\":{$elemMatch:{"
+                  "$or:[{\"jobs\":{$elemMatch:{"
                   + jobName + ","
-                  + jobNumber + "}}},"
+                  + jobNumber + "}}},{"
+                  + open + "}]},"
                   "{$setOnInsert:{"
                   + entry + ","
                   + soNumber + ","
-                  + open + ","
-                  "\"jobs\": [{"
+                  + open + "},"
+                  "$addToSet:{\"jobs\": {"
                   + jobName + ","
                   + jobNumber + ","
                   + jobStatus + ","
-                  + machine + "}]}},"
+                  + machine + "}}},"
                   "{upsert: true})");
-
     // The \n is needed for the shell know the commit of the input
     dbData.append("\n");
-
 //    qDebug().noquote() << '\n' << dbData << '\n';
+
     client(dbData);
-}
-
-void Database::updateJobStarted(QByteArray data)
-{
-    data.prepend("db.getCollection('serviceOrders').update(");
-
-    int x;
-    QByteArray y("\"jobName\":");
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x, "\"jobs\": {$elemMatch: {");
-        y = "\"soNumber\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,"}}");
-        }
-    }
-    y = "\"started\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x-1,"}");
-    }
-    y = "\"started\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.remove(x,y.size());
-        data.insert(x,"{$set:{\"jobs.$.jobStatus\":\"running\",\"jobs.$.started\":");
-    }
-    y = "{\"jobs.$.started\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x+y.size(),"new Date(");
-        y = "}})";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x,")");
-        }
-    }
-
-    data.append("})\n");
-
-    //    qDebug().noquote() << database;
-    client(data);
 }
 
 void Database::updateJobStarted(QJsonObject jsonData)
@@ -236,30 +133,7 @@ void Database::updateJobStarted(QJsonObject jsonData)
     dbData.append("\n");
 
 //    qDebug().noquote() << '\n' << dbData << '\n';
-
     client(dbData);
-}
-
-void Database::updateJobCheck(QByteArray data)
-{
-    data.prepend("db.getCollection('serviceOrders').update(");
-
-    int x;
-    QByteArray y("\"jobName\":");
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x, "\"jobs\": {$elemMatch: {");
-        y = "\"soNumber\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,"}}");
-        }
-    }
-    data.append(",{$set:{\"open\":false}})\n");
-
-//    qDebug().noquote() << database;
-    client(data);
-
 }
 
 void Database::updateJobCheck(QJsonObject jsonData)
@@ -274,48 +148,14 @@ void Database::updateJobCheck(QJsonObject jsonData)
 
     dbData.append("db.getCollection('serviceOrders').update({"
                   + soNumber + ","
-                  "\"jobs\":{$elemMatch:{"
-                  + jobName + ","
-                  + jobNumber + "}}},"
+                  "\"open\": true},"
                   "{$set:{"
                   + open + ","
                   + finished + "}})");
     dbData.append("\n");
 
 //    qDebug().noquote() << '\n' << dbData << '\n';
-
     client(dbData);
-}
-
-void Database::updateJobEnded(QByteArray data)
-{
-//    database.prepend("db.getCollection('serviceOrders').update(");
-
-//    int x;
-//    QByteArray y("\"jobName\":");
-//    if (database.contains(y)){
-//        x = database.indexOf(y);
-//        database.insert(x, "\"jobs\": {$elemMatch: {");
-//        y = "\"soNumber\":";
-//        if (database.contains(y)){
-//            x = database.indexOf(y);
-//            database.insert(x-1,"}}");
-//        }
-//    }
-
-//    database.append("})\n");
-
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    QJsonObject obj(doc.object());
-
-    QString string;
-    QByteArray command;
-    command.append("db.getCollection('serviceOrders').update({");
-    command.append("\"soNumber\":");
-    command.append(QString::number(obj["jobNumber"].toDouble()));
-
-//    qDebug().noquote() << command;
-    //qDebug().noquote() << QString::number(obj["jobNumber"].toDouble());
 }
 
 void Database::updateJobEnded(QJsonObject jsonData)
@@ -346,63 +186,6 @@ void Database::updateJobEnded(QJsonObject jsonData)
 
 //    qDebug().noquote() << '\n' << dbData << '\n';
     client(dbData);
-}
-
-void Database::updateJobStep(QByteArray data)
-{
-    data.prepend("db.getCollection('serviceOrders').update(");
-
-    int x;
-    QByteArray y("\"jobName\":");
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x, "\"jobs\": {$elemMatch: {");
-        y = "\"soNumber\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,"}}");
-        }
-    }
-    y = "\"steps\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x-1,"}");
-    }
-    y = "\"steps\":[";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.remove(x,y.size());
-        data.insert(x,"{$addToSet:{\"jobs.$.steps\":");
-    }
-//    y = "\"conditionCode\":";
-//    if (database.contains(y)){
-//        x = database.indexOf(y);
-//        database.insert(x+y.size(),"NumberInt(");
-//        y = "\"cpuTime\":";
-//        if (database.contains(y)){
-//                x = database.indexOf(y);
-//                database.insert(x-1,")");
-//        }
-//    }
-    y = "\"finished\":";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.insert(x+y.size(),"new Date(");
-        y = "\"program\":";
-        if (data.contains(y)){
-            x = data.indexOf(y);
-            data.insert(x-1,")");
-        }
-    }
-    y = "]";
-    if (data.contains(y)){
-        x = data.indexOf(y);
-        data.replace(x,y.size(),"}");
-    }
-    data.append(")\n");
-
-//    qDebug().noquote() << data;
-//    client(data);
 }
 
 void Database::updateJobStep(QJsonObject jsonData)
@@ -438,50 +221,13 @@ void Database::updateJobStep(QJsonObject jsonData)
                   + elapsedTime + ","
                   + srbTime + "}}})");
     dbData.append("\n");
-
 //    qDebug().noquote() << dbData;
-
     client(dbData);
 }
 
 void Database::inputCode(CodeType code)
 {
     updateCode(code);
-}
-
-void Database::receiveData(QByteArray data)
-{
-
-    switch(code){
-    case PWETRT10:
-//        qDebug() << "Database: Job Entry";
-//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-//        insertOrUpdateJob(data);
-        break;
-    case PWEUJI10:
-//        qDebug() << "Database: Job Started";
-//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-//        updateJobStarted(data);
-        break;
-    case PWETRT20:
-//        qDebug() << "Database: Processing Job - Step Ended";
-//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-//        updateJobStep(data);
-        break;
-    case PWETRT40:
-//        qDebug() << "Database: Job runned without errors";
-//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-//        updateJobCheck(data);
-        break;
-    case PWETRT30:
-//        qDebug() << "Database: Job ended";
-//        qDebug().noquote() << "-------Inicia aqui-------\n" << data << "\n-------Termina aqui-------\n";
-//        updateJobEnded(data);
-        break;
-    default:
-        qDebug() << "Database: code not defined, yet!";
-        break;
-    }
 }
 
 void Database::receiveData(QJsonObject data)
@@ -510,10 +256,9 @@ void Database::receiveData(QJsonObject data)
 
 void Database::openMongoConn()
 {
-    mongoClient.start(program, arguments, QProcess::WriteOnly);
-    if (!mongoClient.waitForFinished(1000)){
-        mongoClient.closeReadChannel(QProcess::StandardOutput);
-        mongoClient.closeReadChannel(QProcess::StandardError);
+    mongoClient.start(program, arguments, QProcess::ReadWrite);
+    if (mongoClient.waitForStarted()){
+        mongoClient.write("use ACME\n");
     } else {
         qDebug() << "Mongo client couldn't connect to server";
         exit(1);
@@ -524,7 +269,6 @@ void Database::closeMongoConn()
 {
     mongoClient.write("exit\n");
     mongoClient.waitForBytesWritten();
-    mongoClient.closeWriteChannel();
     mongoClient.waitForFinished();
     mongoClient.close();
 }
@@ -532,5 +276,4 @@ void Database::closeMongoConn()
 void Database::updateCode(CodeType code)
 {
     this->code = code;
-    //qDebug() << "Database::code >" << *this->code;
 }

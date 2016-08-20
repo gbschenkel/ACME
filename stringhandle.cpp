@@ -66,10 +66,14 @@ void StringHandle::validate(QString str){
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
+        case NOT_DEFINED_CODE:
+            break;
         default:
 //            qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
             break;
         }
+    } else {
+        qDebug() << "String doesn't have match:\n";
+        qDebug() << str + "\n";
     }
-    else qDebug() << "String doesn't have match";
 }
