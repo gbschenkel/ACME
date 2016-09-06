@@ -30,9 +30,12 @@
 
 Database::Database(QObject *parent) : QObject(parent)
 {
-    qDebug() << "MongoDB";
     //startServer();
     //checkCollection();
+    openMongoConn();
+    client("db.serviceOrders.createIndex({\"soNumber\": NumberInt(1),\"jobs.jobName\": NumberInt(1),\"jobs.jobNumber\": NumberInt(1)},{unique: true,drop: true,name: \"noDuplicates\"})\n");
+    client("db.serviceOrders.createIndex({\"entry\": NumberInt(-1),\"finished\": NumberInt(-1)},{background: true,name: \"jobsView\"})\n");
+    closeMongoConn();
 }
 
 void Database::startServer()
@@ -51,30 +54,6 @@ void Database::client(QByteArray database)
 {
     mongoClient.write(database);
     mongoClient.waitForBytesWritten();
-}
-
-QByteArray Database::otherClient(QByteArray database)
-{
-    QProcess mongoClient;
-    mongoClient.start(program, arguments, QProcess::ReadWrite);
-    if (mongoClient.waitForStarted()){
-        mongoClient.write("use ACME\n");
-    } else {
-        qDebug() << "Mongo client couldn't connect to server";
-        exit(1);
-    }
-
-    mongoClient.write(database);
-    mongoClient.waitForBytesWritten();
-    mongoClient.write("exit\n");
-    mongoClient.waitForBytesWritten();
-    QByteArray input;
-    while (mongoClient.waitForReadyRead()){
-        input += mongoClient.readAllStandardOutput();
-    }
-    mongoClient.waitForFinished();
-    mongoClient.close();
-    return input;
 }
 
 void Database::insertOrUpdateJob(QJsonObject jsonData)
@@ -219,6 +198,7 @@ void Database::updateJobStep(QJsonObject jsonData)
                   + finished + ","
                   + conditionCode + ","
                   + elapsedTime + ","
+                  + cpuTime + ","
                   + srbTime + "}}})");
     dbData.append("\n");
 //    qDebug().noquote() << dbData;
@@ -258,7 +238,7 @@ void Database::openMongoConn()
 {
     mongoClient.start(program, arguments, QProcess::ReadWrite);
     if (mongoClient.waitForStarted()){
-        mongoClient.write("use ACME\n");
+//        mongoClient.write("use ACME\n");
     } else {
         qDebug() << "Mongo client couldn't connect to server";
         exit(1);

@@ -22,11 +22,15 @@
 #include "logreader.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QDateTime>
 
 LogReader::LogReader(QObject *parent) : QObject(parent)
 {
 
-    configuration = new Config();
+    if (!isRunning("mongod.exe")){
+        qDebug() << "MongoDB Server is not running!";
+        exit(0);
+    }
 
     connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
     connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
@@ -46,6 +50,8 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
 
 //    directory.setPath("C:/Temp/Data");
 //    fileList << "/Pvqvscmw.log";
+
+//    directory.setPath("C:/Temp/Data");
 //    fileList << "/Log (1).log" << "/Log (2).log"
 //             << "/Log (3).log" << "/Log (4).log"
 //             << "/Log (5).log" << "/Log (6).log"
@@ -61,7 +67,12 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
 //             << "/Log (25).log" << "/Log (26).log"
 //             << "/Log (27).log" << "/Log (28).log"
 //             << "/Log (29).log" << "/Log (30).log"
-//             << "/Log (31).log" << "/Log (32).log";
+//             << "/Log (31).log" << "/Log (32).log"
+//             << "/Log (33).log" << "/Log (34).log"
+//             << "/Log (35).log" << "/Log (36).log"
+//             << "/Log (37).log" << "/Log (38).log"
+//             << "/Log (39).log" << "/Log (40).log"
+//             << "/Log (41).log" << "/Log (42).log";
 
     // Força a leitura no arquivo na inicialização.
     readFile(0);
@@ -78,7 +89,7 @@ void LogReader::fileChanged(QString str)
 
 void LogReader::readFile(int i)
 {
-    qint64 index = configuration->getIndex();
+    qint64 index = configuration.getIndex();
     QString lastLine;
 
     QFile file(directory.absolutePath()+fileList.at(i));
@@ -88,7 +99,7 @@ void LogReader::readFile(int i)
         qDebug() << "File not found or can't be read.";
         return;
     }
-    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " opened!";
+    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " opened at " + QDateTime::currentDateTime().toString();
 
     QTextStream in(&file);
     in.seek(index);
@@ -103,14 +114,16 @@ void LogReader::readFile(int i)
      * Se no final do processo ele não achar, seta o index como 0 \
      * para que o arquivo seja lido desde o inicio.
     */
-    if (lastLine != configuration->getLastLine()) {
+    if (lastLine != configuration.getLastLine()) {
         if (i < fileList.size()-1) {
+            qDebug() << "Last string readed not found, searching in a older file...";
             readFile(i+1);
         }
         index = 0;
         in.seek(index);
     }
 
+    qDebug() << "Reading file...";
     emit(readToWrite());
 
     /*
@@ -137,10 +150,22 @@ void LogReader::readFile(int i)
      */
     index = in.pos()-lastLine.size()-2;
 
-    configuration->setIndex(index);
-    configuration->setLastLine(lastLine);
-    configuration->doWrite();
+    configuration.setIndex(index);
+    configuration.setLastLine(lastLine);
+    configuration.doWrite();
 
     file.close();
-    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " closed!";
+    qDebug() << "File " + directory.absolutePath()+fileList.at(i) + " closed at " + QDateTime::currentDateTime().toString();
+}
+
+bool LogReader::isRunning(const QString &process) {
+  QProcess tasklist;
+  tasklist.start(
+        "tasklist",
+        QStringList() << "/NH"
+                      << "/FO" << "CSV"
+                      << "/FI" << QString("IMAGENAME eq %1").arg(process));
+  tasklist.waitForFinished();
+  QString output = tasklist.readAllStandardOutput();
+  return output.startsWith(QString("\"%1").arg(process));
 }

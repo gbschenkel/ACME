@@ -40,7 +40,7 @@ public:
     explicit LogReader(QObject *parent = 0);
 
 private:
-    Config *configuration;
+    Config configuration;
     QStringList fileList;
     QDir directory;
     QFileSystemWatcher watcher;
@@ -49,7 +49,8 @@ private:
     StringHandle sHandle;
     JSON json;
 
-    void readFile(int i);
+    void readFile(int i);    
+    bool isRunning(const QString &process);
 
 signals:
     void dataReceived(QString str);

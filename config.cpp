@@ -20,15 +20,17 @@
 ****************************************************************************/
 
 #include "config.h"
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDebug>
 
 Config::Config(QObject *parent) : QObject(parent)
 {
-    QCoreApplication::setOrganizationName("TrollTech");
-    QCoreApplication::setOrganizationDomain("trolltech.com.br");
-    QCoreApplication::setApplicationName("ACME");
+//    QCoreApplication::setOrganizationName("TrollTech");
+//    QCoreApplication::setOrganizationDomain("trolltech.com.br");
+//    QCoreApplication::setApplicationName("ACME");
 
-    settings = new QSettings();
-
+    settings = new QSettings(QCoreApplication::applicationDirPath()+"/acme.ini", QSettings::IniFormat);
+    qDebug() << QCoreApplication::applicationDirPath() << "/acme.ini";
     readSettings();
 }
 

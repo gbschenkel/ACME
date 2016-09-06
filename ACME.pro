@@ -2,8 +2,10 @@ QT += core sql
 QT -= gui
 
 TARGET = ACME
-CONFIG += console
+CONFIG += console c++11
 CONFIG -= app_bundle
+
+QMAKE_CXXFLAGS += -std=c++11
 
 TEMPLATE = app
 
