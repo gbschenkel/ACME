@@ -25,9 +25,9 @@
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setOrganizationName("TrollTech");
-    QCoreApplication::setOrganizationDomain("trolltech.com.br");
-    QCoreApplication::setApplicationName("ACME");
+//    QCoreApplication::setOrganizationName("TrollTech");
+//    QCoreApplication::setOrganizationDomain("trolltech.com.br");
+//    QCoreApplication::setApplicationName("ACME");
 
     QCoreApplication a(argc, argv);
 

@@ -1,6 +1,7 @@
 /****************************************************************************
 **
-** <one line to give the program's name and a brief idea of what it does.>
+** Druid - Is a piece of program for read text file and store as json data.
+** This is part of it's code.
 ** Copyright (C) 2016  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
@@ -17,42 +18,32 @@
 **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **
 ****************************************************************************/
-#ifndef JSON_H
-#define JSON_H
 
-#include "definition.h"
+#ifndef BSONHANDLER_H
+#define BSONHANDLER_H
 
-#include <QtCore/QRegularExpressionMatch>
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
-#include <QtCore/QJsonArray>
-#include <QtCore/QByteArray>
 #include <QtCore/QObject>
+#include <QtCore/QRegularExpressionMatch>
 
-class JSON : public QObject
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/builder/stream/helpers.hpp>
+
+class BsonHandler : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    explicit JSON(QObject *parent = 0);
+  explicit BsonHandler(QObject *parent = 0);
 
-private:
-    CodeType code;
-    void newDocument(QRegularExpressionMatch match);
-    void jobStarted(QRegularExpressionMatch match);
-    void jobStep(QRegularExpressionMatch match);
-    void jobCheck(QRegularExpressionMatch match);
-    void jobEnded(QRegularExpressionMatch match);
-    void documentToJSON(QJsonDocument jsonDocument);
-    void updateCode(CodeType code);
-
+  bsoncxx::document::value newDocument(QRegularExpressionMatch match);
+  bsoncxx::document::value filter(QRegularExpressionMatch match);
+  bsoncxx::document::value filter2(QRegularExpressionMatch match);
+  bsoncxx::document::value started(QRegularExpressionMatch match);
+  bsoncxx::document::value running(QRegularExpressionMatch match);
+  bsoncxx::document::value check(QRegularExpressionMatch match);
+  bsoncxx::document::value ended(QRegularExpressionMatch match);
 signals:
-    void documentCreated(QByteArray);
-    void jsonCreated(QJsonObject);
 
 public slots:
-    void inputData(QRegularExpressionMatch match);
-    void inputCode(CodeType code);
-
 };
 
-#endif // JSON_H
+#endif // BSONHANDLER_H

@@ -25,7 +25,6 @@
 #include "config.h"
 #include "database.h"
 #include "definition.h"
-#include "json.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QDir>
@@ -47,7 +46,6 @@ private:
 
     Database db;
     StringHandle sHandle;
-    JSON json;
 
     void readFile(int i);    
     bool isRunning(const QString &process);

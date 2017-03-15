@@ -31,49 +31,47 @@ StringHandle::StringHandle(QObject *parent) : QObject(parent)
 
 void StringHandle::checkString(QString str)
 {
-    validate(str);
+  validate(str);
 }
 
 void StringHandle::validate(QString str){
 
-    QRegularExpressionMatch match = stringCode.match(str);
-    if (match.hasMatch()) {
-        code = checkCode(match.captured("code"));
-        emit codeChanged(code);
-        switch (code){
+  QRegularExpressionMatch match = stringCode.match(str);
+  if (match.hasMatch()) {
+      code = checkCode(match.captured("code"));
+      emit codeChanged(code);
+      switch (code){
         case PWETRT10:
-            match = entry.match(str);
-            if (match.hasMatch())
-                emit dataValidated(match);
-            break;
+          match = entry.match(str);
+          if (match.hasMatch())
+            emit dataValidated(match);
+          break;
         case PWEUJI10:
-            match = started.match(str);
-            if (match.hasMatch())
-                emit dataValidated(match);
-            break;
+          match = started.match(str);
+          if (match.hasMatch())
+            emit dataValidated(match);
+          break;
         case PWETRT20:
-            match = stepProcessed.match(str);
-            if (match.hasMatch())
-                emit dataValidated(match);
-            break;
+          match = stepProcessed.match(str);
+          if (match.hasMatch())
+            emit dataValidated(match);
+          break;
         case PWETRT40:
-            match = checkIfOkay.match(str);
-            if (match.hasMatch())
-                emit dataValidated(match);
-            break;
+          match = checkIfOkay.match(str);
+          if (match.hasMatch())
+            emit dataValidated(match);
+          break;
         case PWETRT30:
-            match = ended.match(str);
-            if (match.hasMatch())
-                emit dataValidated(match);
-            break;
+          match = ended.match(str);
+          if (match.hasMatch())
+            emit dataValidated(match);
+          break;
         case NOT_DEFINED_CODE:
-            break;
-        default:
-//            qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
-            break;
+          qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
+          break;
         }
     } else {
-        qDebug() << "String doesn't have match:\n";
-        qDebug() << str + "\n";
+      qDebug() << "String doesn't have match:\n";
+      qDebug() << str + "\n";
     }
 }
