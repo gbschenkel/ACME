@@ -38,7 +38,7 @@ BsonHandler::BsonHandler(QObject *parent) : QObject(parent)
 
 }
 
-bsoncxx::document::value BsonHandler::newDocument(QRegularExpressionMatch match)
+bsoncxx::document::value BsonHandler::newEntry(QRegularExpressionMatch match)
 {
 
 //  qDebug() << match.captured(0);
@@ -48,8 +48,8 @@ bsoncxx::document::value BsonHandler::newDocument(QRegularExpressionMatch match)
   auto builder = document{};
 
   builder << "soNumber" << b_int32{match.captured("soNumber").toInt()}
-          << "entry" << b_date{std::chrono::milliseconds{mseconds}}
           << "open" << b_bool{true}
+          << "entry" << b_date{std::chrono::milliseconds{mseconds}}
           << "finished" << b_null{}
           << "jobs" << open_array << open_document
             << "jobName" << b_utf8{match.captured("jobName").toStdString()}

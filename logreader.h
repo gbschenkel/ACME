@@ -29,6 +29,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QDir>
 #include <QtCore/QFileSystemWatcher>
+#include <QtCore/QProcess>
 #include <QtCore/QTextStream>
 #include <QtCore/qglobal.h>
 

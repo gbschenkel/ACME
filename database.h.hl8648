@@ -26,8 +26,12 @@
 #include "definition.h"
 #include "bsonhandler.h"
 
+#include <QtCore/QByteArray>
+#include <QtCore/QJsonObject>
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
+#include <QtCore/QThread>
+#include <QtCore/QProcess>
 
 #include <mongocxx/client.hpp>
 #include <mongocxx/collection.hpp>
@@ -42,6 +46,7 @@ public:
 
 private:
     CodeType code;
+    QProcess mongoClient;
 //    const QString program = "C:/mongodb/bin/mongo.exe";
 //    const QStringList arguments = (QStringList() << "--quiet" << "--verbose" << "--host" << "localhost" << "--port" << "27017" << "ACME");
 
@@ -49,13 +54,24 @@ private:
     mongocxx::client conn;
     mongocxx::collection collection;
 
+    void client(QByteArray database);
     void createIndex(mongocxx::collection collection);
-
+    void startServer();
+    void updateCode(CodeType code);
+    void insertOrUpdateJob(QJsonObject jsonData);
+    void updateJobStep(QJsonObject jsonData);
+    void updateJobStarted(QJsonObject jsonData);
+    void updateJobCheck(QJsonObject jsonData);
+    void updateJobEnded(QJsonObject jsonData);
 signals:
 
 public slots:
     void inputCode(CodeType code);
+    void receiveData(QJsonObject data);
     void receiveData(QRegularExpressionMatch match);
+    void openMongoConn();
+    void closeMongoConn();
+
 };
 
 #endif // DATABASE_H

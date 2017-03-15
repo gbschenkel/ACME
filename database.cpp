@@ -22,25 +22,17 @@
 #include "database.h"
 #include "bsonhandler.h"
 
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonArray>
-#include <QtCore/QProcess>
 #include <QtCore/QDebug>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
-#include <QtCore/QTimer>
 
 #include <mongocxx/exception/exception.hpp>
 #include <bsoncxx/json.hpp>
-
-// TODO: change code for use native mongocxx api
 
 Database::Database(QObject *parent) : QObject(parent)
 {
   conn = mongocxx::uri{"mongodb://192.168.56.101:27017"};
   collection = conn["ACME"]["serviceOrders"];
-//  auto cursor = collection.list_indexes();
-
   try {
     createIndex(collection);
   } catch (mongocxx::exception e) {
@@ -82,98 +74,6 @@ void Database::createIndex(mongocxx::collection collection){
 
 }
 
-/*
-void Database::updateJobCheck(QJsonObject jsonData)
-{
-    QByteArray dbData;
-
-    QString soNumber = "\"soNumber\": NumberInt(" + QString::number(jsonData.value("soNumber").toDouble()) + ")";
-    QString jobName = "\"jobName\": \"" + jsonData["jobs"].toArray().first().toObject().value("jobName").toString() + "\"";
-    QString jobNumber = "\"jobNumber\": NumberInt(" + QString::number(jsonData["jobs"].toArray().first().toObject().value("jobNumber").toDouble()) + ")";
-    QString open = "\"open\": " + QString(jsonData.value("open").toBool() ? "true": "false");
-    QString finished = "\"finished\": ISODate(\"" + jsonData.value("finished").toString() + "\")";
-
-    dbData.append("db.getCollection('serviceOrders').update({"
-                  + soNumber + ","
-                  "\"open\": true},"
-                  "{$set:{"
-                  + open + ","
-                  + finished + "}})");
-    dbData.append("\n");
-
-//    qDebug().noquote() << '\n' << dbData << '\n';
-//    client(dbData);
-}
-
-void Database::updateJobEnded(QJsonObject jsonData)
-{
-    QByteArray dbData;
-
-    QString soNumber = "\"soNumber\": NumberInt(" + QString::number(jsonData.value("soNumber").toDouble()) + ")";
-    QString jobName = "\"jobName\":\"" + jsonData["jobs"].toArray().first().toObject().value("jobName").toString() + "\"";
-    QString jobNumber = "\"jobNumber\":NumberInt(" + QString::number(jsonData["jobs"].toArray().first().toObject().value("jobNumber").toDouble()) + ")";
-    QString jobStatus = "\"jobs.$.jobStatus\":\"" + jsonData["jobs"].toArray().first().toObject().value("jobStatus").toString() + "\"";
-    QString finished = "\"jobs.$.finished\":ISODate(\"" + jsonData["jobs"].toArray().first().toObject().value("finished").toString() + "\")";
-    QString elapsedTime = "\"jobs.$.elapsedTime\":" + QString::number(jsonData["jobs"].toArray().first().toObject().value("elapsedTime").toDouble());
-    QString cpuTime = "\"jobs.$.cpuTime\":" + QString::number(jsonData["jobs"].toArray().first().toObject().value("cpuTime").toDouble());
-    QString srbTime = "\"jobs.$.srbTime\":" + QString::number(jsonData["jobs"].toArray().first().toObject().value("srbTime").toDouble());
-
-    dbData.append("db.getCollection('serviceOrders').update({"
-                  + soNumber + ","
-                  "\"jobs\":{$elemMatch:{"
-                  + jobName + ","
-                  + jobNumber + "}}},"
-                  "{$set:{"
-                  + jobStatus + ","
-                  + finished + ","
-                  + elapsedTime + ","
-                  + cpuTime + ","
-                  + srbTime + "}})");
-    dbData.append("\n");
-
-//    qDebug().noquote() << '\n' << dbData << '\n';
-//    client(dbData);
-}
-
-void Database::updateJobStep(QJsonObject jsonData)
-{
-    QByteArray dbData;
-
-    QString soNumber = "\"soNumber\": NumberInt(" + QString::number(jsonData.value("soNumber").toDouble()) + ")";
-    QString entry = "\"entry\": ISODate(\"" + jsonData.value("entry").toString() + "\")";
-    QString open = "\"open\": " + QString(jsonData.value("open").toBool() ? "true": "false");
-    QString jobName = "\"jobName\": \"" + jsonData["jobs"].toArray().first().toObject().value("jobName").toString() + "\"";
-    QString jobNumber = "\"jobNumber\": NumberInt(" + QString::number(jsonData["jobs"].toArray().first().toObject().value("jobNumber").toDouble()) + ")";
-    QString jobStatus = "\"jobStatus\": \"" + jsonData["jobs"].toArray().first().toObject().value("jobStatus").toString() + "\"";
-    QString machine = "\"machine\": \"" + jsonData["jobs"].toArray().first().toObject().value("machine").toString() + "\"";
-    QString stepName = "\"stepName\": \"" + jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("stepName").toString() + "\"";
-    QString program = "\"program\": \"" + jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("program").toString() + "\"";
-    QString finished = "\"finished\": ISODate(\"" + jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("finished").toString() + "\")";
-    QString conditionCode = "\"conditionCode\": \"" + jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("conditionCode").toString() + "\"";
-    QString elapsedTime = "\"elapsedTime\": " + QString::number(jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("elapsedTime").toDouble());
-    QString cpuTime = "\"cpuTime\": " + QString::number(jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("cpuTime").toDouble());
-    QString srbTime = "\"srbTime\": " + QString::number(jsonData["jobs"].toArray().first().toObject().value("steps").toArray().first().toObject().value("srbTime").toDouble());
-
-
-    dbData.append("db.getCollection('serviceOrders').update({"
-                  + soNumber + ","
-                  "\"jobs\":{$elemMatch:{"
-                  + jobName + ","
-                  + jobNumber + "}}},"
-                  "{$addToSet:{\"jobs.$.steps\":{"
-                  + stepName + ","
-                  + program + ","
-                  + finished + ","
-                  + conditionCode + ","
-                  + elapsedTime + ","
-                  + cpuTime + ","
-                  + srbTime + "}}})");
-    dbData.append("\n");
-//    qDebug().noquote() << dbData;
-//    client(dbData);
-}
-*/
-
 void Database::inputCode(CodeType code)
 {
     this->code = code;
@@ -185,7 +85,7 @@ void Database::receiveData(QRegularExpressionMatch match)
   switch(code){
     case PWETRT10:
       try {
-        collection.insert_one(bsonHandler.newDocument(match).view());
+        collection.insert_one(bsonHandler.newEntry(match).view());
       } catch (mongocxx::exception e) {
         qDebug() << "An error occurred: " << e.what();
       }

@@ -34,7 +34,7 @@ class BsonHandler : public QObject
 public:
   explicit BsonHandler(QObject *parent = 0);
 
-  bsoncxx::document::value newDocument(QRegularExpressionMatch match);
+  bsoncxx::document::value newEntry(QRegularExpressionMatch match);
   bsoncxx::document::value filter(QRegularExpressionMatch match);
   bsoncxx::document::value filter2(QRegularExpressionMatch match);
   bsoncxx::document::value started(QRegularExpressionMatch match);
