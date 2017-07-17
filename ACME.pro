@@ -2,7 +2,7 @@ QT += core
 QT -= gui
 
 TARGET = ACME
-CONFIG += console c++11 link_pkgconfig
+CONFIG += c++11 console link_pkgconfig
 CONFIG -= app_bundle
 
 PKGCONFIG += libmongocxx

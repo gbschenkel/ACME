@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Druid - Is a piece of program for read text file and store as json data.
+** ACME - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -25,25 +25,28 @@
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
 
-#include <bsoncxx/builder/stream/document.hpp>
-#include <bsoncxx/builder/stream/helpers.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
 
 class BsonHandler : public QObject
 {
-  Q_OBJECT
-public:
-  explicit BsonHandler(QObject *parent = 0);
+    Q_OBJECT
+  public:
+    explicit BsonHandler(QObject *parent = 0);
 
-  bsoncxx::document::value newEntry(QRegularExpressionMatch match);
-  bsoncxx::document::value filter(QRegularExpressionMatch match);
-  bsoncxx::document::value filter2(QRegularExpressionMatch match);
-  bsoncxx::document::value started(QRegularExpressionMatch match);
-  bsoncxx::document::value running(QRegularExpressionMatch match);
-  bsoncxx::document::value check(QRegularExpressionMatch match);
-  bsoncxx::document::value ended(QRegularExpressionMatch match);
-signals:
+    bsoncxx::document::value newEntry(QRegularExpressionMatch match);
+    bsoncxx::document::value filter(QRegularExpressionMatch match);
+    bsoncxx::document::value filterSO(QRegularExpressionMatch match);
+    bsoncxx::document::value filterClosedSO(QRegularExpressionMatch match);
+    bsoncxx::document::value filterWithErrors(QRegularExpressionMatch match);
+    bsoncxx::document::value started(QRegularExpressionMatch match);
+    bsoncxx::document::value processing(QRegularExpressionMatch match);
+    bsoncxx::document::value ended(QRegularExpressionMatch match);
+    bsoncxx::document::value check();
+    bsoncxx::document::value closeOS(QRegularExpressionMatch match);
+    bsoncxx::document::value createIndex();
+  signals:
 
-public slots:
+  public slots:
 };
 
 #endif // BSONHANDLER_H

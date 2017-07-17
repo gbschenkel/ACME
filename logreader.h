@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Druid - Is a piece of program for read text file and store as json data.
+** ACME - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@
 #include "database.h"
 #include "definition.h"
 
-#include <QtCore/QObject>
 #include <QtCore/QDir>
 #include <QtCore/QFileSystemWatcher>
+#include <QtCore/QObject>
 #include <QtCore/QProcess>
 #include <QtCore/QTextStream>
 #include <QtCore/qglobal.h>
@@ -36,10 +36,10 @@
 class LogReader : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit LogReader(QObject *parent = 0);
 
-private:
+  private:
     Config configuration;
     QStringList fileList;
     QDir directory;
@@ -48,15 +48,15 @@ private:
     Database db;
     StringHandle sHandle;
 
-    void readFile(int i);    
+    void readFile(int i);
     bool isRunning(const QString &process);
 
-signals:
+  signals:
     void dataReceived(QString str);
     void readToWrite();
     void writenDone();
 
-public slots:
+  public slots:
     void fileChanged(QString str);
 };
 

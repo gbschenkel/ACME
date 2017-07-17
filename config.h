@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Druid - Is a piece of program for read text file and store as json data.
+** ACME - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 class Config : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit Config(QObject *parent = 0);
 
     qint64 getIndex();
@@ -39,7 +39,7 @@ public:
     void setLastLine(QString line);
     void doWrite();
 
-private:
+  private:
     qint64 index;
     QString lastLine;
     QSettings *settings;
@@ -47,11 +47,9 @@ private:
     void writeSettings();
     void readSettings();
 
-signals:
+  signals:
 
-public slots:
-
-
+  public slots:
 };
 
 #endif // CONFIG_H

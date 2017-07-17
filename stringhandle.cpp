@@ -1,7 +1,8 @@
 /****************************************************************************
 **
-** <one line to give the program's name and a brief idea of what it does.>
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** ACME - Is a piece of program for read text file and store as json data.
+** This is part of it's code.
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -20,58 +21,53 @@
 
 #include "stringhandle.h"
 
+#include <QtCore/QDebug>
 #include <QtCore/QRegularExpression>
 #include <QtCore/QRegularExpressionMatch>
-#include <QtCore/QDebug>
 
-StringHandle::StringHandle(QObject *parent) : QObject(parent)
+StringHandle::StringHandle(QObject *parent) : QObject(parent) {}
+
+void StringHandle::checkString(QString str) { validate(str); }
+
+void StringHandle::validate(QString str)
 {
 
-}
-
-void StringHandle::checkString(QString str)
-{
-  validate(str);
-}
-
-void StringHandle::validate(QString str){
-
-  QRegularExpressionMatch match = stringCode.match(str);
-  if (match.hasMatch()) {
-      code = checkCode(match.captured("code"));
-      emit codeChanged(code);
-      switch (code){
+    QRegularExpressionMatch match = stringCode.match(str);
+    if (match.hasMatch()) {
+        code = checkCode(match.captured("code"));
+        emit codeChanged(code);
+        switch (code) {
         case PWETRT10:
-          match = entry.match(str);
-          if (match.hasMatch())
-            emit dataValidated(match);
-          break;
+            match = entry.match(str);
+            if (match.hasMatch())
+                emit dataValidated(match);
+            break;
         case PWEUJI10:
-          match = started.match(str);
-          if (match.hasMatch())
-            emit dataValidated(match);
-          break;
+            match = started.match(str);
+            if (match.hasMatch())
+                emit dataValidated(match);
+            break;
         case PWETRT20:
-          match = stepProcessed.match(str);
-          if (match.hasMatch())
-            emit dataValidated(match);
-          break;
+            match = stepProcessed.match(str);
+            if (match.hasMatch())
+                emit dataValidated(match);
+            break;
         case PWETRT40:
-          match = checkIfOkay.match(str);
-          if (match.hasMatch())
-            emit dataValidated(match);
-          break;
+            match = checkIfOkay.match(str);
+            if (match.hasMatch())
+                emit dataValidated(match);
+            break;
         case PWETRT30:
-          match = ended.match(str);
-          if (match.hasMatch())
-            emit dataValidated(match);
-          break;
+            match = ended.match(str);
+            if (match.hasMatch())
+                emit dataValidated(match);
+            break;
         case NOT_DEFINED_CODE:
-          qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
-          break;
+            // qDebug() << "StringHandle: " + match.captured(1) + " code not defined, yet!";
+            break;
         }
     } else {
-      qDebug() << "String doesn't have match:\n";
-      qDebug() << str + "\n";
+        qDebug() << "String doesn't have match:\n";
+        qDebug() << str + "\n";
     }
 }

@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Druid - Is a piece of program for read text file and store as json data.
+** ACME - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,38 +22,72 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include "stringhandle.h"
-#include "definition.h"
 #include "bsonhandler.h"
+#include "definition.h"
+#include "stringhandle.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpressionMatch>
 
-#include <mongocxx/client.hpp>
-#include <mongocxx/collection.hpp>
-#include <mongocxx/instance.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
+#include <bsoncxx/json.hpp>
+#include <bsoncxx/stdx/make_unique.hpp>
 
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/exception.hpp>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/logger.hpp>
+#include <mongocxx/options/client.hpp>
+#include <mongocxx/stdx.hpp>
+#include <mongocxx/uri.hpp>
+
+#include <iostream>
+
+namespace
+{
+
+class logger final : public mongocxx::logger
+{
+  public:
+    explicit logger(std::ostream *stream) : _stream(stream) {}
+
+    void operator()(mongocxx::log_level level, mongocxx::stdx::string_view domain,
+                    mongocxx::stdx::string_view message) noexcept override
+    {
+        if (level >= mongocxx::log_level::k_trace)
+            return;
+        *_stream << '[' << mongocxx::to_string(level) << '@' << domain << "] " << message << '\n';
+    }
+
+  private:
+    std::ostream *const _stream;
+};
+
+} // namespace
 
 class Database : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit Database(QObject *parent = 0);
 
-private:
+  private:
     CodeType code;
-//    const QString program = "C:/mongodb/bin/mongo.exe";
-//    const QStringList arguments = (QStringList() << "--quiet" << "--verbose" << "--host" << "localhost" << "--port" << "27017" << "ACME");
+    //    const QString program = "C:/mongodb/bin/mongo.exe";
+    //    const QStringList arguments = (QStringList() << "--quiet" <<
+    //    "--verbose" << "--host" << "localhost" << "--port" << "27017" <<
+    //    "ACME");
 
-    mongocxx::instance inst{};
-    mongocxx::client conn;
+    mongocxx::instance inst{bsoncxx::stdx::make_unique<logger>(&std::cout)};
+    mongocxx::client client;
     mongocxx::collection collection;
 
     void createIndex(mongocxx::collection collection);
 
-signals:
+  signals:
 
-public slots:
+  public slots:
     void inputCode(CodeType code);
     void receiveData(QRegularExpressionMatch match);
 };

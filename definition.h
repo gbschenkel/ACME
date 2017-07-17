@@ -1,7 +1,8 @@
 /****************************************************************************
 **
-** <one line to give the program's name and a brief idea of what it does.>
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** ACME - Is a piece of program for read text file and store as json data.
+** This is part of it's code.
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -23,12 +24,11 @@
 #include <QtCore/QObject>
 #include <QtCore/QRegularExpression>
 
-enum CodeType{
-    PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10, NOT_DEFINED_CODE
-};
+enum CodeType { PWETRT10, PWETRT20, PWETRT30, PWETRT40, PWEUJI10, NOT_DEFINED_CODE };
 
-inline CodeType checkCode(QString s){
-    //qDebug() << s;
+inline CodeType checkCode(QString s)
+{
+    // qDebug() << s;
     if (s == "PWETRT10")
         return PWETRT10;
     else if (s == "PWETRT20")
@@ -42,10 +42,10 @@ inline CodeType checkCode(QString s){
     return NOT_DEFINED_CODE;
 }
 
-//PWETRT10 - PWETRT20 - PWETRT30 - PWETRT40 - PWEUJI10
+// PWETRT10 - PWETRT20 - PWETRT30 - PWETRT40 - PWEUJI10
 QRegularExpression const stringCode("(?<code>\\w{6}\\d{2})\\s");
 
-//07/12/2015 21:40:26 - SYSB.PWETRT10 BRWCK22  ZN013232   42946 07/12/15 21:40:12
+// 07/12/2015 21:40:26 - SYSB.PWETRT10 BRWCK22  ZN013232   42946 07/12/15 21:40:12
 QRegularExpression const entry("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
                                "(?<machine>\\w{4})\\."
@@ -54,10 +54,10 @@ QRegularExpression const entry("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                "ZN(?<soNumber>\\d{6})\\s+"
                                "(?<jobNumber>\\d{5})\\s"
                                "(?<entryDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                               "(?<entryTime>\\d{2}:\\d{2}:\\d{2})"
-                               );
+                               "(?<entryTime>\\d{2}:\\d{2}:\\d{2})");
 
-//07/12/2015 21:36:14 - SYSB.PWEUJI10 BQRC122  ZN557601             STARTED   2015.341  21:36 42308 07/12/15 21:36:02                                        .00
+// 07/12/2015 21:36:14 - SYSB.PWEUJI10 BQRC122  ZN557601             STARTED   2015.341  21:36 42308
+// 07/12/15 21:36:02                                        .00
 QRegularExpression const started("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                  "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
                                  "(?<machine>\\w{4})\\."
@@ -69,11 +69,10 @@ QRegularExpression const started("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                  "\\d{2}:\\d{2}\\s"
                                  "(?<jobNumber>\\d{5})\\s"
                                  "(?<executionDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                                 "(?<executionTime>\\d{2}:\\d{2}:\\d{2})"
-                                 );
+                                 "(?<executionTime>\\d{2}:\\d{2}:\\d{2})");
 
-
-//08/12/2015 12:28:12 - SYSB.PWETRT20 BRRBAB2  SORE0001 SORT      0000 ZN559035             E=      .001M C=      .02 S S=      .00 S 48373 08/12/15 12:28:03.00
+// 08/12/2015 12:28:12 - SYSB.PWETRT20 BRRBAB2  SORE0001 SORT      0000 ZN559035             E=
+//.001M C=      .02 S S=      .00 S 48373 08/12/15 12:28:03.00
 QRegularExpression const stepProcessed("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                        "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
                                        "(?<machine>\\w{4})\\."
@@ -88,10 +87,9 @@ QRegularExpression const stepProcessed("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})
                                        "S=\\s+(?<srbTime>\\d*\\D\\d+)\\sS\\s"
                                        "(?<jobNumber>\\d{5})\\s"
                                        "(?<executionDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                                       "(?<executionTime>\\d{2}:\\d{2}:\\d{2})"
-                                       );
+                                       "(?<executionTime>\\d{2}:\\d{2}:\\d{2})");
 
-//08/12/2015 12:30:27 - SYSB.PWETRT40 BJLC242  ZN559043   48570 08/12/15 12:30:21                                                                            .00
+// 08/12/2015 12:30:27 - SYSB.PWETRT40 BJLC242  ZN559043   48570 08/12/15 12:30:21 .00
 QRegularExpression const checkIfOkay("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                      "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
                                      "(?<machine>\\w{4})\\."
@@ -100,10 +98,10 @@ QRegularExpression const checkIfOkay("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\
                                      "ZN(?<soNumber>\\d{6})\\s+"
                                      "(?<jobNumber>\\d{5})\\s"
                                      "(?<executionDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                                     "(?<executionTime>\\d{2}:\\d{2}:\\d{2})"
-                                     );
+                                     "(?<executionTime>\\d{2}:\\d{2}:\\d{2})");
 
-//08/12/2015 12:30:28 - SYSB.PWETRT30 BJLC242  ENDED NAME=ZN559043             ELAPSED TIME=      .050M CPU=      .26S SRB=      .00S 48570 08/12/15 12:30:22.00
+// 08/12/2015 12:30:28 - SYSB.PWETRT30 BJLC242  ENDED NAME=ZN559043             ELAPSED TIME=
+//.050M CPU=      .26S SRB=      .00S 48570 08/12/15 12:30:22.00
 QRegularExpression const ended("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                "(?<bufferReadTime>\\d{2}:\\d{2}:\\d{2})\\s-\\s"
                                "(?<machine>\\w{4})\\."
@@ -115,7 +113,6 @@ QRegularExpression const ended("^(?<bufferReadDate>\\d{2}/\\d{2}/\\d{4})\\s"
                                "SRB=\\s+(?<srbTime>\\d*\\D\\d+)S\\s"
                                "(?<jobNumber>\\d{5})\\s"
                                "(?<executionDate>\\d{2}/\\d{2}/\\d{2})\\s"
-                               "(?<executionTime>\\d{2}:\\d{2}:\\d{2})"
-                               );
+                               "(?<executionTime>\\d{2}:\\d{2}:\\d{2})");
 
 #endif // DEFINITION_H

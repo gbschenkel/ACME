@@ -1,7 +1,8 @@
 /****************************************************************************
 **
-** <one line to give the program's name and a brief idea of what it does.>
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** ACME - Is a piece of program for read text file and store as json data.
+** This is part of it's code.
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -29,20 +30,19 @@
 class StringHandle : public QObject
 {
     Q_OBJECT
-public:
+  public:
     explicit StringHandle(QObject *parent = 0);
 
-private:
+  private:
     CodeType code;
     void validate(QString str);
 
-signals:
+  signals:
     void dataValidated(QRegularExpressionMatch match);
     void codeChanged(CodeType code);
 
-public slots:
+  public slots:
     void checkString(QString str);
-
 };
 
 #endif // STRINGHANDLE_H

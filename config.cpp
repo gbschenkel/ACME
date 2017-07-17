@@ -1,8 +1,8 @@
 /****************************************************************************
 **
-** Druid - Is a piece of program for read text file and store as json data.
+** ACME - Is a piece of program for read text file and store as json data.
 ** This is part of it's code.
-** Copyright (C) 2016  Gustavo Brondani Schenkel
+** Copyright (C) 2017  Gustavo Brondani Schenkel
 **
 ** This program is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -25,39 +25,24 @@
 
 Config::Config(QObject *parent) : QObject(parent)
 {
-//    QCoreApplication::setOrganizationName("TrollTech");
-//    QCoreApplication::setOrganizationDomain("trolltech.com.br");
-//    QCoreApplication::setApplicationName("ACME");
+    //    QCoreApplication::setOrganizationName("TrollTech");
+    //    QCoreApplication::setOrganizationDomain("trolltech.com.br");
+    //    QCoreApplication::setApplicationName("ACME");
 
-    settings = new QSettings(QCoreApplication::applicationDirPath()+"/acme.ini", QSettings::IniFormat);
+    settings = new QSettings(QCoreApplication::applicationDirPath() + "/acme.ini", QSettings::IniFormat);
     qDebug() << QCoreApplication::applicationDirPath() << "/acme.ini";
     readSettings();
 }
 
-qint64 Config::getIndex()
-{
-    return index;
-}
+qint64 Config::getIndex() { return index; }
 
-QString Config::getLastLine()
-{
-    return lastLine;
-}
+QString Config::getLastLine() { return lastLine; }
 
-void Config::setIndex(qint64 newIndex)
-{
-    index = newIndex;
-}
+void Config::setIndex(qint64 newIndex) { index = newIndex; }
 
-void Config::setLastLine(QString line)
-{
-    lastLine = line;
-}
+void Config::setLastLine(QString line) { lastLine = line; }
 
-void Config::doWrite()
-{
-    writeSettings();
-}
+void Config::doWrite() { writeSettings(); }
 
 void Config::writeSettings()
 {
