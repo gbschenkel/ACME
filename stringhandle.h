@@ -31,7 +31,7 @@ class StringHandle : public QObject
 {
     Q_OBJECT
   public:
-    explicit StringHandle(QObject *parent = 0);
+    explicit StringHandle(QObject *parent = nullptr);
 
   private:
     CodeType code;

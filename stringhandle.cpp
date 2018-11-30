@@ -38,27 +38,27 @@ void StringHandle::validate(QString str)
         emit codeChanged(code);
         switch (code) {
         case PWETRT10:
-            match = entry.match(str);
+            match = TRT10.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWEUJI10:
-            match = started.match(str);
+            match = UJI10.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT20:
-            match = stepProcessed.match(str);
+            match = TRT20.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT40:
-            match = checkIfOkay.match(str);
+            match = TRT40.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;
         case PWETRT30:
-            match = ended.match(str);
+            match = TRT30.match(str);
             if (match.hasMatch())
                 emit dataValidated(match);
             break;

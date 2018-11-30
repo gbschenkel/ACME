@@ -23,27 +23,30 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
+#include <QtCore/QThread>
 
 LogReader::LogReader(QObject *parent) : QObject(parent)
 {
 
-    connect(&watcher, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
-    connect(this, SIGNAL(dataReceived(QString)), &sHandle, SLOT(checkString(QString)));
-    connect(&sHandle, SIGNAL(codeChanged(CodeType)), &db, SLOT(inputCode(CodeType)));
+    connect(&watcher, &QFileSystemWatcher::fileChanged,
+            this, &LogReader::fileChanged);
+    connect(this, &LogReader::dataReceived,
+            &sHandle, &StringHandle::checkString);
+    connect(&sHandle, &StringHandle::codeChanged,
+            &db, &Database::inputCode);
 
     connect(&sHandle, SIGNAL(dataValidated(QRegularExpressionMatch)), &db, SLOT(receiveData(QRegularExpressionMatch)));
 
-    //  directory.setPath("Z:/Log");
-    //  fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
-    //           << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
-    //           << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
-    //           << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
-    //           << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
+    directory.setPath("Z:/Log");
+    fileList << "/Pvqvscmw.log"  << "/Pvqvscmw1.log"
+             << "/Pvqvscmw2.log" << "/Pvqvscmw3.log"
+             << "/Pvqvscmw4.log" << "/Pvqvscmw5.log"
+             << "/Pvqvscmw6.log" << "/Pvqvscmw7.log"
+             << "/Pvqvscmw8.log" << "/Pvqvscmw9.log";
 
-    //  directory.setPath("C:/Temp/Data");
-    //  fileList << "/Pvqvscmw.log";
-
+    /*
     directory.setPath("C:/Temp/Data");
+
     fileList << "/Log (1).log"
              << "/Log (2).log"
              << "/Log (3).log"
@@ -95,7 +98,7 @@ LogReader::LogReader(QObject *parent) : QObject(parent)
              << "/Log (49).log"
              << "/Log (50).log"
              << "/Log (51).log";
-
+    */
     // Força a leitura no arquivo na inicialização.
     qDebug() << "Testando\n" << directory.absolutePath() + fileList.at(0);
     readFile(0);
@@ -108,6 +111,7 @@ void LogReader::fileChanged(QString str)
         watcher.addPath(directory.absolutePath() + fileList.at(0));
     str.remove(directory.path());
     readFile(fileList.indexOf(str));
+    QThread::sleep(2);
 }
 
 void LogReader::readFile(int i)
@@ -151,28 +155,27 @@ void LogReader::readFile(int i)
     emit(readToWrite());
 
     /*
-       * Posiciona entrada de dados na última posição lida no arquivo;
-       * Como essa linha já foi lida e processada na última vez, ele lê ela
-       * e não faz nada, para que no próximo passo ele possa processar dados novos.
-       * O objeto lastLine recebe os dados para que caso ele não tenha mais nada que processar,
-       * não salve o lastLine em branco no procedimento de salvar.
-       */
+     * Posiciona entrada de dados na última posição lida no arquivo;
+     * Como essa linha já foi lida e processada na última vez, ele lê ela
+     * e não faz nada, para que no próximo passo ele possa processar dados novos.
+     * O objeto lastLine recebe os dados para que caso ele não tenha mais nada que processar,
+     * não salve o lastLine em branco no procedimento de salvar.
+     */
     while (!in.atEnd()) {
         lastLine = in.readLine();
         // qDebug () << lastLine;
         /*
-           * Aqui processará os dados contidos no objeto lastLine
-          */
+         * Aqui processará os dados contidos no objeto lastLine
+         */
         emit dataReceived(lastLine);
     }
 
     emit(writenDone());
     /*
-       * O valor do index é igual a posição atual no arquivo, diminuido do tamanho do registro
-     * anterior,
-       * e decrementado 2(duas) unidades, que é o valor do '\n'.
-       *
-       */
+     * O valor do index é igual a posição atual no arquivo, diminuido do tamanho do registro
+     * anterior, e decrementado 2(duas) unidades, que é o valor do '\n'.
+     *
+     */
     index = in.pos() - lastLine.size() - 2;
 
     configuration.setIndex(index);

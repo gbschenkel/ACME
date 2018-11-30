@@ -37,7 +37,7 @@ class LogReader : public QObject
 {
     Q_OBJECT
   public:
-    explicit LogReader(QObject *parent = 0);
+    explicit LogReader(QObject *parent = nullptr);
 
   private:
     Config configuration;

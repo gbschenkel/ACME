@@ -26,9 +26,9 @@ HEADERS += \
     definition.h \
     bsonhandler.h \
     mainframe.h \
-    mmd.h \
     payware.h \
-    script.h
+    script.h \
+    mmd.h
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings

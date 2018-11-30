@@ -20,6 +20,7 @@
 ****************************************************************************/
 
 #include "config.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 
@@ -30,7 +31,6 @@ Config::Config(QObject *parent) : QObject(parent)
     //    QCoreApplication::setApplicationName("ACME");
 
     settings = new QSettings(QCoreApplication::applicationDirPath() + "/acme.ini", QSettings::IniFormat);
-    qDebug() << QCoreApplication::applicationDirPath() << "/acme.ini";
     readSettings();
 }
 

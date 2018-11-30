@@ -70,7 +70,7 @@ class Database : public QObject
 {
     Q_OBJECT
   public:
-    explicit Database(QObject *parent = 0);
+    explicit Database(QObject *parent = nullptr);
 
   private:
     CodeType code;
@@ -84,8 +84,6 @@ class Database : public QObject
     mongocxx::collection collection;
 
     void createIndex(mongocxx::collection collection);
-
-  signals:
 
   public slots:
     void inputCode(CodeType code);

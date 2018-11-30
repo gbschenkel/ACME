@@ -32,7 +32,7 @@ using bsoncxx::builder::basic::make_document;
 Database::Database(QObject *parent) : QObject(parent)
 {
     try {
-        const auto uri = mongocxx::uri{"mongodb://192.168.121.11:27017"};
+        const auto uri = mongocxx::uri{"mongodb://localhost:27017"};
         mongocxx::options::client client_options;
 
         if (uri.ssl()) {

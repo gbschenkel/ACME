@@ -31,7 +31,7 @@ class BsonHandler : public QObject
 {
     Q_OBJECT
   public:
-    explicit BsonHandler(QObject *parent = 0);
+    explicit BsonHandler(QObject *parent = nullptr);
 
     bsoncxx::document::value newEntry(QRegularExpressionMatch match);
     bsoncxx::document::value filter(QRegularExpressionMatch match);
@@ -44,9 +44,6 @@ class BsonHandler : public QObject
     bsoncxx::document::value check();
     bsoncxx::document::value closeOS(QRegularExpressionMatch match);
     bsoncxx::document::value createIndex();
-  signals:
-
-  public slots:
 };
 
 #endif // BSONHANDLER_H

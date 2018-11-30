@@ -30,7 +30,7 @@ class Config : public QObject
 {
     Q_OBJECT
   public:
-    explicit Config(QObject *parent = 0);
+    explicit Config(QObject *parent = nullptr);
 
     qint64 getIndex();
     QString getLastLine();
@@ -46,10 +46,6 @@ class Config : public QObject
 
     void writeSettings();
     void readSettings();
-
-  signals:
-
-  public slots:
 };
 
 #endif // CONFIG_H
